@@ -13,7 +13,7 @@ from mvn_mcp_server.shared.data_types import ErrorCode
 from mvn_mcp_server.shared.utils import (
     validate_maven_dependency,
     validate_version_string,
-    determine_packaging
+    determine_packaging,
 )
 from mvn_mcp_server.services.maven_api import MavenApiService
 from mvn_mcp_server.services.version import VersionService
@@ -31,7 +31,7 @@ def check_version(
     dependency: str,
     version: str,
     packaging: str = "jar",
-    classifier: Optional[str] = None
+    classifier: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Check a Maven dependency version and provide all version update information.
 
@@ -71,11 +71,7 @@ def check_version(
 
         # Check if the specific version exists
         exists = maven_api.check_artifact_exists(
-            group_id,
-            artifact_id,
-            validated_version,
-            actual_packaging,
-            classifier
+            group_id, artifact_id, validated_version, actual_packaging, classifier
         )
 
         # Get all available versions
@@ -88,7 +84,7 @@ def check_version(
             group_id,
             artifact_id,
             actual_packaging,
-            classifier
+            classifier,
         )
 
         # Prepare the result data
@@ -96,7 +92,7 @@ def check_version(
             "exists": exists,
             "current_version": validated_version,
             "latest_versions": latest_versions,
-            "update_available": update_available
+            "update_available": update_available,
         }
 
         # Return success response
@@ -115,7 +111,7 @@ def check_version(
         logger.error(f"Unexpected error in enhanced version check: {str(e)}")
         raise ToolError(
             f"Unexpected error in enhanced version check: {str(e)}",
-            {"error_code": ErrorCode.INTERNAL_SERVER_ERROR}
+            {"error_code": ErrorCode.INTERNAL_SERVER_ERROR},
         )
 
 
@@ -125,7 +121,7 @@ def _get_latest_component_versions(
     group_id: str,
     artifact_id: str,
     packaging: str,
-    classifier: Optional[str] = None
+    classifier: Optional[str] = None,
 ) -> Tuple[Dict[str, str], Dict[str, bool]]:
     """Get the latest version for each semantic version component.
 
@@ -147,9 +143,7 @@ def _get_latest_component_versions(
     # Find latest version for each component
     for component in components:
         filtered_versions = version_service.filter_versions(
-            versions,
-            component,
-            reference_version
+            versions, component, reference_version
         )
 
         # If we have filtered versions, get the latest
@@ -159,11 +153,7 @@ def _get_latest_component_versions(
             # Verify the version exists with the current packaging/classifier
             if classifier:
                 exists = maven_api.check_artifact_exists(
-                    group_id,
-                    artifact_id,
-                    latest_version,
-                    packaging,
-                    classifier
+                    group_id, artifact_id, latest_version, packaging, classifier
                 )
 
                 # If it doesn't exist with the classifier, try to find one that does
@@ -171,11 +161,7 @@ def _get_latest_component_versions(
                     for ver in filtered_versions:
                         if ver != latest_version:
                             exists = maven_api.check_artifact_exists(
-                                group_id,
-                                artifact_id,
-                                ver,
-                                packaging,
-                                classifier
+                                group_id, artifact_id, ver, packaging, classifier
                             )
                             if exists:
                                 latest_version = ver
@@ -187,7 +173,8 @@ def _get_latest_component_versions(
             # A version is considered an update if it's different and higher than the reference
             update_available[component] = (
                 latest_version != reference_version
-                and version_service.compare_versions(latest_version, reference_version) > 0
+                and version_service.compare_versions(latest_version, reference_version)
+                > 0
             )
         else:
             # Use reference version as fallback if no filtered versions

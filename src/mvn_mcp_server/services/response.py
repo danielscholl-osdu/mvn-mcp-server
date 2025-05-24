@@ -23,11 +23,7 @@ def format_success_response(tool_name: str, data: Dict[str, Any]) -> Dict[str, A
     Returns:
         A standardized response dictionary
     """
-    response = {
-        "tool_name": tool_name,
-        "status": "success",
-        "result": data
-    }
+    response = {"tool_name": tool_name, "status": "success", "result": data}
 
     logger.debug(f"Formatted success response for {tool_name}: {data}")
     return response
@@ -37,7 +33,7 @@ def format_error_response(
     tool_name: str,
     error_code: ErrorCode,
     message: str,
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Format a standardized error response.
 
@@ -54,9 +50,9 @@ def format_error_response(
         "tool_name": tool_name,
         "status": "error",
         "error": {
-            "code": error_code.value if hasattr(error_code, 'value') else error_code,
-            "message": message
-        }
+            "code": error_code.value if hasattr(error_code, "value") else error_code,
+            "message": message,
+        },
     }
 
     if details:

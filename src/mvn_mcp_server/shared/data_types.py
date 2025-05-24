@@ -86,7 +86,9 @@ class MavenLatestComponentVersionRequest(BaseModel):
 
     dependency: str = Field(description="Maven dependency in groupId:artifactId format")
     version: str = Field(description="Version string to use as reference")
-    target_component: str = Field(description="Component to find the latest version for ('major', 'minor', or 'patch')")
+    target_component: str = Field(
+        description="Component to find the latest version for ('major', 'minor', or 'patch')"
+    )
     packaging: str = Field(default="jar", description="Package type (jar, war, etc.)")
     classifier: str | None = Field(default=None, description="Optional classifier")
 
@@ -116,7 +118,9 @@ class MavenLatestComponentVersionRequest(BaseModel):
     def validate_target_component(cls, v: str) -> str:
         """Validate the target component."""
         if v not in ["major", "minor", "patch"]:
-            raise ValueError("Target component must be one of 'major', 'minor', or 'patch'")
+            raise ValueError(
+                "Target component must be one of 'major', 'minor', or 'patch'"
+            )
         return v
 
 
@@ -183,11 +187,15 @@ class MavenDependencyItem(BaseModel):
 class MavenBatchVersionCheckRequest(BaseModel):
     """Request model for batch version checking with all version updates."""
 
-    dependencies: List[MavenDependencyItem] = Field(description="List of Maven dependencies to check")
+    dependencies: List[MavenDependencyItem] = Field(
+        description="List of Maven dependencies to check"
+    )
 
     @field_validator("dependencies")
     @classmethod
-    def validate_dependencies(cls, v: List[MavenDependencyItem]) -> List[MavenDependencyItem]:
+    def validate_dependencies(
+        cls, v: List[MavenDependencyItem]
+    ) -> List[MavenDependencyItem]:
         """Validate the dependencies list."""
         if not v or len(v) == 0:
             raise ValueError("At least one dependency is required")
@@ -201,7 +209,9 @@ class MavenListAvailableVersionsRequest(BaseModel):
     version: str = Field(description="Current version string to use as reference")
     packaging: str = Field(default="jar", description="Package type (jar, war, etc.)")
     classifier: str | None = Field(default=None, description="Optional classifier")
-    include_all_versions: bool = Field(default=False, description="Whether to include all versions in the response")
+    include_all_versions: bool = Field(
+        default=False, description="Whether to include all versions in the response"
+    )
 
     @field_validator("dependency")
     @classmethod
@@ -228,13 +238,30 @@ class MavenListAvailableVersionsRequest(BaseModel):
 class JavaSecurityScanRequest(BaseModel):
     """Request model for scanning Java projects for security vulnerabilities."""
 
-    workspace: str = Field(description="The absolute path to the Java project directory")
-    include_profiles: Optional[List[str]] = Field(default=None, description="Maven profiles to activate during scanning")
-    scan_all_modules: bool = Field(default=True, description="Whether to scan all modules or just the specified project")
-    scan_mode: str = Field(default="workspace", description="Scan mode (workspace or pom_only)")
-    pom_file: Optional[str] = Field(default=None, description="Path to specific pom.xml file to scan (only used in pom_only mode)")
-    severity_filter: Optional[List[str]] = Field(default=None, description="List of severity levels to include (critical, high, medium, low)")
-    max_results: int = Field(default=100, description="Maximum number of vulnerability results to return")
+    workspace: str = Field(
+        description="The absolute path to the Java project directory"
+    )
+    include_profiles: Optional[List[str]] = Field(
+        default=None, description="Maven profiles to activate during scanning"
+    )
+    scan_all_modules: bool = Field(
+        default=True,
+        description="Whether to scan all modules or just the specified project",
+    )
+    scan_mode: str = Field(
+        default="workspace", description="Scan mode (workspace or pom_only)"
+    )
+    pom_file: Optional[str] = Field(
+        default=None,
+        description="Path to specific pom.xml file to scan (only used in pom_only mode)",
+    )
+    severity_filter: Optional[List[str]] = Field(
+        default=None,
+        description="List of severity levels to include (critical, high, medium, low)",
+    )
+    max_results: int = Field(
+        default=100, description="Maximum number of vulnerability results to return"
+    )
     offset: int = Field(default=0, description="Starting offset for paginated results")
 
     @field_validator("workspace")
@@ -264,7 +291,9 @@ class JavaSecurityScanRequest(BaseModel):
         valid_severities = ["critical", "high", "medium", "low", "unknown"]
         for severity in v:
             if severity.lower() not in valid_severities:
-                raise ValueError(f"Invalid severity: {severity}. Must be one of {valid_severities}")
+                raise ValueError(
+                    f"Invalid severity: {severity}. Must be one of {valid_severities}"
+                )
         return v
 
 
@@ -273,18 +302,32 @@ class JavaVulnerability(BaseModel):
 
     module: str = Field(description="Module name/path where vulnerability was found")
     group_id: str = Field(description="Maven group ID of the vulnerable dependency")
-    artifact_id: str = Field(description="Maven artifact ID of the vulnerable dependency")
-    installed_version: str = Field(description="Installed version of the vulnerable dependency")
+    artifact_id: str = Field(
+        description="Maven artifact ID of the vulnerable dependency"
+    )
+    installed_version: str = Field(
+        description="Installed version of the vulnerable dependency"
+    )
     vulnerability_id: str = Field(description="Vulnerability identifier")
     cve_id: str = Field(description="CVE identifier")
-    severity: str = Field(description="Severity level (critical, high, medium, low, unknown)")
+    severity: str = Field(
+        description="Severity level (critical, high, medium, low, unknown)"
+    )
     description: str = Field(description="Description of the vulnerability")
     recommendation: str = Field(description="Recommended version to upgrade to")
-    in_profile: Optional[str] = Field(default=None, description="Profile where the vulnerability was found")
-    direct_dependency: bool = Field(description="Whether this is a direct dependency or transitive")
-    is_in_bom: bool = Field(description="Whether this dependency is in a Bill of Materials")
+    in_profile: Optional[str] = Field(
+        default=None, description="Profile where the vulnerability was found"
+    )
+    direct_dependency: bool = Field(
+        description="Whether this is a direct dependency or transitive"
+    )
+    is_in_bom: bool = Field(
+        description="Whether this dependency is in a Bill of Materials"
+    )
     version_source: str = Field(description="Source of the version definition")
-    source_location: str = Field(description="File and location where the version is defined")
+    source_location: str = Field(
+        description="File and location where the version is defined"
+    )
     links: List[str] = Field(description="Links to vulnerability information")
     fix_available: bool = Field(description="Whether a fixed version exists")
 
@@ -301,13 +344,31 @@ class JavaPaginationInfo(BaseModel):
 class JavaSecurityScanResult(BaseModel):
     """Model for the result of a Java security scan."""
 
-    scan_mode: str = Field(description="Scan mode used (trivy, trivy-pom-only, or basic)")
-    vulnerabilities_found: bool = Field(description="Whether vulnerabilities were found")
-    total_vulnerabilities: int = Field(description="Total number of vulnerabilities found")
+    scan_mode: str = Field(
+        description="Scan mode used (trivy, trivy-pom-only, or basic)"
+    )
+    vulnerabilities_found: bool = Field(
+        description="Whether vulnerabilities were found"
+    )
+    total_vulnerabilities: int = Field(
+        description="Total number of vulnerabilities found"
+    )
     modules_scanned: List[str] = Field(description="List of modules scanned")
-    profiles_activated: List[str] = Field(description="List of profiles activated during scan")
-    severity_counts: dict = Field(description="Counts of vulnerabilities by severity level")
-    vulnerabilities: List[JavaVulnerability] = Field(description="List of vulnerabilities found")
-    pagination: Optional[JavaPaginationInfo] = Field(default=None, description="Pagination information")
-    scan_limitations: Optional[List[str]] = Field(default=None, description="Limitations of the scan")
-    recommendations: Optional[List[str]] = Field(default=None, description="Recommendations for improving scan results")
+    profiles_activated: List[str] = Field(
+        description="List of profiles activated during scan"
+    )
+    severity_counts: dict = Field(
+        description="Counts of vulnerabilities by severity level"
+    )
+    vulnerabilities: List[JavaVulnerability] = Field(
+        description="List of vulnerabilities found"
+    )
+    pagination: Optional[JavaPaginationInfo] = Field(
+        default=None, description="Pagination information"
+    )
+    scan_limitations: Optional[List[str]] = Field(
+        default=None, description="Limitations of the scan"
+    )
+    recommendations: Optional[List[str]] = Field(
+        default=None, description="Recommendations for improving scan results"
+    )

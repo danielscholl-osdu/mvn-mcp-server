@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock, mock_open
 
 from mvn_mcp_server.tools.java_security_scan import (
     scan_java_project,
-    check_trivy_availability
+    check_trivy_availability,
 )
 
 
@@ -31,17 +31,25 @@ class TestJavaSecurityScan:
         </project>"""
 
         pom_path = workspace / "pom.xml"
-        with open(pom_path, 'w') as f:
+        with open(pom_path, "w") as f:
             f.write(pom_content)
 
         return workspace
 
-    @patch('mvn_mcp_server.tools.java_security_scan.check_trivy_availability')
-    @patch('os.unlink')  # Add patch for os.unlink
-    @patch('tempfile.NamedTemporaryFile')
-    @patch('subprocess.run')
-    @patch('builtins.open', new_callable=mock_open)
-    def test_trivy_scan(self, mock_open_file, mock_run, mock_temp_file, mock_unlink, mock_check_trivy, mock_workspace):
+    @patch("mvn_mcp_server.tools.java_security_scan.check_trivy_availability")
+    @patch("os.unlink")  # Add patch for os.unlink
+    @patch("tempfile.NamedTemporaryFile")
+    @patch("subprocess.run")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_trivy_scan(
+        self,
+        mock_open_file,
+        mock_run,
+        mock_temp_file,
+        mock_unlink,
+        mock_check_trivy,
+        mock_workspace,
+    ):
         """Test Trivy scanning."""
         # Set up mocks
         mock_check_trivy.return_value = True
@@ -72,16 +80,20 @@ class TestJavaSecurityScan:
                             "Severity": "CRITICAL",
                             "Description": "Log4Shell vulnerability",
                             "References": [
-                                {"URL": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"}
-                            ]
+                                {
+                                    "URL": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"
+                                }
+                            ],
                         }
-                    ]
+                    ],
                 }
             ]
         }
 
         # Configure the mock_open to work correctly with the explicit filename
-        mock_open_file.return_value.__enter__.return_value.read.return_value = json.dumps(trivy_json_response)
+        mock_open_file.return_value.__enter__.return_value.read.return_value = (
+            json.dumps(trivy_json_response)
+        )
 
         # Execute the function
         result = scan_java_project(str(mock_workspace))
@@ -93,12 +105,15 @@ class TestJavaSecurityScan:
         assert result["result"]["total_vulnerabilities"] == 1
         assert len(result["result"]["modules_scanned"]) == 1
         assert result["result"]["severity_counts"]["critical"] == 1
-        assert "scan_limitations" not in result["result"] or result["result"]["scan_limitations"] is None
+        assert (
+            "scan_limitations" not in result["result"]
+            or result["result"]["scan_limitations"] is None
+        )
 
         # Verify mock calls
         mock_check_trivy.assert_called_once()
         mock_run.assert_called_once()
-        mock_open_file.assert_called_with(temp_file_name, 'r')
+        mock_open_file.assert_called_with(temp_file_name, "r")
 
         # Verify Trivy command arguments
         args, kwargs = mock_run.call_args
@@ -110,7 +125,7 @@ class TestJavaSecurityScan:
         assert "--format" in trivy_cmd
         assert "json" in trivy_cmd
 
-    @patch('mvn_mcp_server.tools.java_security_scan.check_trivy_availability')
+    @patch("mvn_mcp_server.tools.java_security_scan.check_trivy_availability")
     def test_trivy_not_available(self, mock_check_trivy, mock_workspace):
         """Test handling when Trivy is not available."""
         # Set up mock
@@ -145,7 +160,7 @@ class TestJavaSecurityScan:
 class TestHelperFunctions:
     """Tests for helper functions in the java_security_scan module."""
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_trivy_availability_check(self, mock_run):
         """Test checking Trivy availability."""
         # Trivy available

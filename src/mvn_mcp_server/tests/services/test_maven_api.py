@@ -218,7 +218,9 @@ class TestMavenApiService(unittest.TestCase):
 
     @patch("mvn_mcp_server.services.maven_api.MavenApiService.fetch_artifact_metadata")
     @patch("mvn_mcp_server.services.maven_api.MavenApiService.check_artifact_exists")
-    def test_get_latest_version_with_classifier(self, mock_check_exists, mock_fetch_metadata):
+    def test_get_latest_version_with_classifier(
+        self, mock_check_exists, mock_fetch_metadata
+    ):
         """Test getting latest version with classifier."""
         # Mock metadata response
         mock_fetch_metadata.return_value = {
@@ -233,7 +235,7 @@ class TestMavenApiService(unittest.TestCase):
         # The release version doesn't have the classifier
         mock_check_exists.side_effect = [
             False,  # For release version (1.9.0)
-            True,   # For latest version (2.0.0)
+            True,  # For latest version (2.0.0)
         ]
 
         # Call the method

@@ -17,16 +17,23 @@ from mvn_mcp_server.shared.data_types import ErrorCode
 class TestListAvailableVersions:
     """Test suite for list_available_versions tool."""
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
-    @patch('mvn_mcp_server.tools.list_available_versions.version_service')
-    def test_successful_list_with_all_versions(self, mock_version_service, mock_maven_api):
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
+    @patch("mvn_mcp_server.tools.list_available_versions.version_service")
+    def test_successful_list_with_all_versions(
+        self, mock_version_service, mock_maven_api
+    ):
         """Test successful version listing with all versions included."""
         # Mock dependencies
         mock_maven_api.check_artifact_exists.return_value = True
         mock_maven_api.get_all_versions.return_value = [
-            "1.0.0", "1.0.1", "1.0.2",
-            "1.1.0", "1.1.1",
-            "2.0.0", "2.0.1-SNAPSHOT", "2.0.2"
+            "1.0.0",
+            "1.0.1",
+            "1.0.2",
+            "1.1.0",
+            "1.1.1",
+            "2.0.0",
+            "2.0.1-SNAPSHOT",
+            "2.0.2",
         ]
 
         # Mock version parsing and comparison
@@ -65,25 +72,30 @@ class TestListAvailableVersions:
 
         # Call the function under test
         result = list_available_versions(
-            dependency="org.example:library",
-            version="1.0.1",
-            include_all_versions=True
+            dependency="org.example:library", version="1.0.1", include_all_versions=True
         )
 
         # Verify success status
         assert result["status"] == "success"
         assert result["tool_name"] == "list_available_versions"
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
-    @patch('mvn_mcp_server.tools.list_available_versions.version_service')
-    def test_successful_list_without_all_versions(self, mock_version_service, mock_maven_api):
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
+    @patch("mvn_mcp_server.tools.list_available_versions.version_service")
+    def test_successful_list_without_all_versions(
+        self, mock_version_service, mock_maven_api
+    ):
         """Test successful version listing without all versions (only current track with versions)."""
         # Mock dependencies
         mock_maven_api.check_artifact_exists.return_value = True
         mock_maven_api.get_all_versions.return_value = [
-            "1.0.0", "1.0.1", "1.0.2",
-            "1.1.0", "1.1.1",
-            "2.0.0", "2.0.1-SNAPSHOT", "2.0.2"
+            "1.0.0",
+            "1.0.1",
+            "1.0.2",
+            "1.1.0",
+            "1.1.1",
+            "2.0.0",
+            "2.0.1-SNAPSHOT",
+            "2.0.2",
         ]
 
         # Mock version parsing and comparison
@@ -124,15 +136,15 @@ class TestListAvailableVersions:
         result = list_available_versions(
             dependency="org.example:library",
             version="1.0.1",
-            include_all_versions=False
+            include_all_versions=False,
         )
 
         # Verify success status
         assert result["status"] == "success"
         assert result["tool_name"] == "list_available_versions"
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
-    @patch('mvn_mcp_server.tools.list_available_versions.version_service')
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
+    @patch("mvn_mcp_server.tools.list_available_versions.version_service")
     def test_empty_versions_list(self, mock_version_service, mock_maven_api):
         """Test behavior when no versions are available."""
         # Mock dependencies
@@ -143,9 +155,7 @@ class TestListAvailableVersions:
 
         # Call the function under test
         result = list_available_versions(
-            dependency="org.example:library",
-            version="1.0.0",
-            include_all_versions=True
+            dependency="org.example:library", version="1.0.0", include_all_versions=True
         )
 
         # Assertions
@@ -158,78 +168,64 @@ class TestListAvailableVersions:
         assert data["latest_version"] == "1.0.0"  # Falls back to current version
         assert data["minor_tracks"] == {}  # Empty tracks
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
     def test_invalid_dependency_format(self, mock_maven_api):
         """Test validation error for invalid dependency format."""
         # Call the function under test with invalid input
         with pytest.raises(ValidationError):
-            list_available_versions(
-                dependency="invalid-format",
-                version="1.0.0"
-            )
+            list_available_versions(dependency="invalid-format", version="1.0.0")
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
     def test_empty_version(self, mock_maven_api):
         """Test validation error for empty version."""
         # Call the function under test with empty version
         with pytest.raises(ValidationError):
-            list_available_versions(
-                dependency="org.example:library",
-                version=""
-            )
+            list_available_versions(dependency="org.example:library", version="")
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
     def test_maven_api_error(self, mock_maven_api):
         """Test handling of Maven API errors."""
         # Mock the API to raise a ResourceError
         mock_maven_api.check_artifact_exists.side_effect = ResourceError(
-            "Maven API connection failed",
-            {"error_code": ErrorCode.MAVEN_API_ERROR}
+            "Maven API connection failed", {"error_code": ErrorCode.MAVEN_API_ERROR}
         )
 
         # Call the function under test
         with pytest.raises(ResourceError) as excinfo:
-            list_available_versions(
-                dependency="org.example:library",
-                version="1.0.0"
-            )
+            list_available_versions(dependency="org.example:library", version="1.0.0")
 
         # Verify the error message
         assert "Maven API connection failed" in str(excinfo.value)
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
     def test_dependency_not_found(self, mock_maven_api):
         """Test handling of dependency not found error."""
         # Mock the API to raise a ResourceError for dependency not found
         mock_maven_api.check_artifact_exists.return_value = False
         mock_maven_api.get_all_versions.side_effect = ResourceError(
             "Dependency org.example:library not found in Maven Central",
-            {"error_code": ErrorCode.DEPENDENCY_NOT_FOUND}
+            {"error_code": ErrorCode.DEPENDENCY_NOT_FOUND},
         )
 
         # Call the function under test
         with pytest.raises(ResourceError) as excinfo:
-            list_available_versions(
-                dependency="org.example:library",
-                version="1.0.0"
-            )
+            list_available_versions(dependency="org.example:library", version="1.0.0")
 
         # Verify the error message
         assert "not found in Maven Central" in str(excinfo.value)
 
-    @patch('mvn_mcp_server.tools.list_available_versions.maven_api')
-    @patch('mvn_mcp_server.tools.list_available_versions.version_service')
+    @patch("mvn_mcp_server.tools.list_available_versions.maven_api")
+    @patch("mvn_mcp_server.tools.list_available_versions.version_service")
     def test_unexpected_error(self, mock_version_service, mock_maven_api):
         """Test handling of unexpected errors."""
         # Mock the API to raise an unexpected exception
-        mock_maven_api.check_artifact_exists.side_effect = Exception("Unexpected internal error")
+        mock_maven_api.check_artifact_exists.side_effect = Exception(
+            "Unexpected internal error"
+        )
 
         # Call the function under test
         with pytest.raises(ToolError) as excinfo:
-            list_available_versions(
-                dependency="org.example:library",
-                version="1.0.0"
-            )
+            list_available_versions(dependency="org.example:library", version="1.0.0")
 
         # Verify the error message
         assert "Unexpected error" in str(excinfo.value)

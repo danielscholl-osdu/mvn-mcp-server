@@ -53,13 +53,13 @@ class VersionService:
             List of version components if matched, None otherwise
         """
         # Standard semver pattern (MAJOR.MINOR.PATCH)
-        semver_match = re.match(r'^(\d+)\.(\d+)\.(\d+)$', base_version)
+        semver_match = re.match(r"^(\d+)\.(\d+)\.(\d+)$", base_version)
         if semver_match:
             major, minor, patch = map(int, semver_match.groups())
             return [major, minor, patch]
 
         # Partial semver pattern (MAJOR.MINOR)
-        partial_match = re.match(r'^(\d+)\.(\d+)$', base_version)
+        partial_match = re.match(r"^(\d+)\.(\d+)$", base_version)
         if partial_match:
             major, minor = map(int, partial_match.groups())
             return [major, minor, 0]
@@ -87,7 +87,9 @@ class VersionService:
 
             # Validate that it looks like a real date
             if 1 <= month <= 12 and 1 <= day <= 31:
-                logger.debug(f"Parsed calendar version {base_version} as {year}.{month}.{day}")
+                logger.debug(
+                    f"Parsed calendar version {base_version} as {year}.{month}.{day}"
+                )
                 return [year, month, day]
         except (ValueError, IndexError):
             pass
@@ -101,7 +103,7 @@ class VersionService:
         Returns:
             List with single major component if numeric, None otherwise
         """
-        simple_match = re.match(r'^(\d+)$', base_version)
+        simple_match = re.match(r"^(\d+)$", base_version)
         if simple_match:
             major = int(simple_match.group(1))
 
@@ -122,14 +124,16 @@ class VersionService:
             List of numeric components, padded to at least 3 elements
         """
         components = []
-        for part in base_version.split('.'):
+        for part in base_version.split("."):
             if part.isdigit():
                 components.append(int(part))
             else:
                 break
 
         if not components:
-            logger.warning(f"Could not parse any numeric components from version: {base_version}")
+            logger.warning(
+                f"Could not parse any numeric components from version: {base_version}"
+            )
             return [0, 0, 0]
 
         # Pad with zeros to ensure at least [major, minor, patch]
@@ -195,7 +199,9 @@ class VersionService:
         return None
 
     @staticmethod
-    def _compare_numeric_components(v1_numeric: List[int], v2_numeric: List[int]) -> Optional[int]:
+    def _compare_numeric_components(
+        v1_numeric: List[int], v2_numeric: List[int]
+    ) -> Optional[int]:
         """Compare numeric version components.
 
         Returns:
@@ -217,7 +223,9 @@ class VersionService:
         return None  # Numeric components are equal
 
     @staticmethod
-    def _handle_final_qualifier_special_case(v1_qualifier: str, v2_qualifier: str) -> Optional[int]:
+    def _handle_final_qualifier_special_case(
+        v1_qualifier: str, v2_qualifier: str
+    ) -> Optional[int]:
         """Handle special case for .Final qualifier.
 
         Returns:
@@ -255,7 +263,7 @@ class VersionService:
             "cr": 50,
             "beta": 40,
             "alpha": 30,
-            "snapshot": 10
+            "snapshot": 10,
         }
 
     @staticmethod
@@ -274,11 +282,15 @@ class VersionService:
     def _compare_qualifiers(v1_qualifier: str, v2_qualifier: str) -> int:
         """Compare version qualifiers."""
         # Handle special cases first
-        final_result = VersionService._handle_final_qualifier_special_case(v1_qualifier, v2_qualifier)
+        final_result = VersionService._handle_final_qualifier_special_case(
+            v1_qualifier, v2_qualifier
+        )
         if final_result is not None:
             return final_result
 
-        empty_result = VersionService._handle_empty_qualifiers(v1_qualifier, v2_qualifier)
+        empty_result = VersionService._handle_empty_qualifiers(
+            v1_qualifier, v2_qualifier
+        )
         if empty_result is not None:
             return empty_result
 
@@ -320,7 +332,9 @@ class VersionService:
         v2_numeric, v2_qualifier = VersionService.parse_version(version2)
 
         # Compare numeric components
-        numeric_result = VersionService._compare_numeric_components(v1_numeric, v2_numeric)
+        numeric_result = VersionService._compare_numeric_components(
+            v1_numeric, v2_numeric
+        )
         if numeric_result is not None:
             return numeric_result
 
@@ -364,10 +378,7 @@ class VersionService:
 
     @staticmethod
     def _filter_by_component(
-        versions: List[str],
-        target_component: str,
-        ref_major: int,
-        ref_minor: int
+        versions: List[str], target_component: str, ref_major: int, ref_minor: int
     ) -> List[str]:
         """Filter versions by the specified component."""
         if target_component == "major":
@@ -376,13 +387,15 @@ class VersionService:
         elif target_component == "minor":
             # For minor, filter versions matching the major component
             return [
-                v for v in versions
+                v
+                for v in versions
                 if VersionService.parse_version(v)[0][0] == ref_major
             ]
         elif target_component == "patch":
             # For patch, filter versions matching the major.minor components
             return [
-                v for v in versions
+                v
+                for v in versions
                 if (
                     VersionService.parse_version(v)[0][0] == ref_major
                     and VersionService.parse_version(v)[0][1] == ref_minor
@@ -393,9 +406,7 @@ class VersionService:
 
     @staticmethod
     def _handle_empty_filter_result(
-        target_component: str,
-        versions: List[str],
-        reference_version: str
+        target_component: str, versions: List[str], reference_version: str
     ) -> List[str]:
         """Handle fallback when no versions match the filter."""
         if target_component == "patch":
@@ -411,9 +422,7 @@ class VersionService:
 
     @staticmethod
     def filter_versions(
-        versions: List[str],
-        target_component: str,
-        reference_version: str
+        versions: List[str], target_component: str, reference_version: str
     ) -> List[str]:
         """Filter versions based on target component (major, minor, patch).
 
@@ -490,7 +499,7 @@ class VersionService:
         sorted_versions = sorted(
             filtered_versions,
             key=functools.cmp_to_key(version_comparator),
-            reverse=True
+            reverse=True,
         )
 
         return sorted_versions[0] if sorted_versions else ""
@@ -513,6 +522,6 @@ class VersionService:
             month = int(version[4:6])
             day = int(version[6:8])
             # Check for valid date range
-            return (1900 <= year <= 2100 and 1 <= month <= 12 and 1 <= day <= 31)
+            return 1900 <= year <= 2100 and 1 <= month <= 12 and 1 <= day <= 31
         except (ValueError, IndexError):
             return False
