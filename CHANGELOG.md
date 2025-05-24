@@ -11,6 +11,14 @@ Each entry includes not just what changed, but WHY it changed and what patterns 
 Key architectural decisions are linked to their ADRs.
 -->
 
+## [0.1.1](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.0...v0.1.1) (2025-05-24)
+
+
+### Bug Fixes
+
+* **deps:** update to fastmcp&gt;=2.0.0 and add httpx dependency ([1af07cf](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/1af07cf0576def77429ebee91612d5b8e05e150a))
+* **imports:** update all imports from mcp.server.fastmcp to fastmcp ([bbc11a8](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/bbc11a83396c5f6503341747f7872a9d6179124e))
+
 ## [0.1.0] - TBD
 
 _This section will be auto-populated by Release Please when the first release is created._
