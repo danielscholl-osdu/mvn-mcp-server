@@ -40,5 +40,6 @@ dev = [
     "pytest",
     "pytest-cov",
     "flake8",
-    "mypy"
+    "mypy",
+    "black"
 ]
