@@ -1,13 +1,17 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file guides AI assistants working with the Maven MCP Server codebase.
+
+## Project Context
+
+Maven MCP Server provides Model Context Protocol access to Maven Central repository for dependency management. It features intelligent caching, comprehensive version parsing, and security scanning capabilities optimized for AI-assisted development workflows.
 
 ## Build/Test Commands
 - Install dependencies: `uv sync`
 - Install in dev mode: `uv pip install -e .`
 - Run all tests: `uv run pytest`
-- Run specific test: `uv run pytest src/maven_mcp_server/tests/tools/test_version_exist.py`
-- Run specific test function: `uv run pytest src/maven_mcp_server/tests/tools/test_version_exist.py::TestCheckMavenVersionExists::test_successful_check_true`
+- Run specific test: `uv run pytest src/mvn_mcp_server/tests/tools/test_check_version.py`
+- Run specific test function: `uv run pytest src/mvn_mcp_server/tests/tools/test_check_version.py::TestCheckVersion::test_success`
 
 ## Code Style
 - Use Python type hints for function parameters and return values
@@ -25,7 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use conventional commit message format (Release Please compatible):
   * Format: `<type>(<scope>): <description>`
   * Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-  * Example: `fix(dependencies): update log4j to patch security vulnerability`
+  * Example: `fix(cache): update TTL for metadata caching`
   * Breaking changes: Add `!` after type/scope and include `BREAKING CHANGE:` in body
   * Example: `feat(api)!: change response format` with body containing `BREAKING CHANGE: API now returns JSON instead of XML`
 - Ensure commit messages are concise and descriptive
@@ -66,3 +70,99 @@ Use the output of the git diff to create the description of the Merge Request. F
   ### Fixed
   - Bug fix Y
   ```
+
+## Essential Commands
+
+```bash
+# Quality checks (run before committing)
+uv run mypy . && uv run flake8 src/ && uv run pytest
+
+# Individual commands
+uv run pytest                    # Run all tests
+uv run pytest -xvs              # Run tests, stop on first failure
+uv run mypy .                   # Type checking
+uv run flake8 src/              # Linting
+uv run black src/ tests/        # Format code
+
+# Development workflow
+uv sync                         # Sync dependencies
+uv pip install -e .             # Install package in editable mode
+```
+
+## Key Architecture Patterns
+
+1. **Synchronous Architecture**: No async/await - simplifies implementation (ADR-002)
+2. **Service Layer Pattern**: Business logic in services, not tools (ADR-007)
+3. **Comprehensive Single-Call**: Tools return all relevant data in one response (ADR-005)
+4. **In-Memory Caching**: TTL-based cache with strategic key design (ADR-003)
+5. **Direct HTTP Integration**: No JVM dependency, pure Python (ADR-004)
+
+## Core Documentation
+
+- @docs/adr/index.md - Architectural decisions index
+- @docs/project-architect.md - System architecture
+- @docs/project-prd.md - Product requirements
+- @docs/project-brief.md - Project overview
+- @AI_EVOLUTION.md - Project evolution story for AI understanding
+- @README.md - Getting started guide
+
+## Development Guidelines
+
+1. **Tool Implementation**: Follow patterns in `src/mvn_mcp_server/tools/`
+2. **Service Design**: Keep business logic in service layer
+3. **Testing**: Write mock-based tests, achieve 70%+ coverage
+4. **Version Parsing**: Support multiple formats (semver, calendar, numeric)
+5. **Error Responses**: Use standardized format with error codes
+
+## Common Tasks
+
+### Adding a New Tool
+1. Create tool file in `src/mvn_mcp_server/tools/`
+2. Implement using service layer for business logic
+3. Register in `server.py` with `@mcp.tool` decorator
+4. Return comprehensive data in single response
+5. Write tests with mocked services
+
+### Modifying Services
+1. Update service in `src/mvn_mcp_server/services/`
+2. Consider cache implications
+3. Update tests to cover new scenarios
+4. Maintain backwards compatibility
+
+### Working with Version Parsing
+- Version formats: semantic (1.2.3), calendar (2024.01.15), numeric (5)
+- Qualifiers: SNAPSHOT < alpha < beta < RC < release
+- Comparison must handle mixed formats correctly
+
+## Testing Guidelines
+
+- Mock external services at service boundaries
+- Use `unittest.mock.patch.object` for service methods
+- Test success and error scenarios
+- Use fixtures for test data
+- Run `uv run pytest` for all tests
+
+## Important Context
+
+- Direct HTTP integration with Maven Central (no Maven libraries)
+- Caching is crucial - respect TTL settings
+- Version parsing must handle real-world Maven artifacts
+- External tools (Trivy) integrated via subprocess
+- All responses optimized for AI consumption
+
+## Maven-Specific Knowledge
+
+### API Endpoints
+- Metadata: `https://repo1.maven.org/maven2/{group}/{artifact}/maven-metadata.xml`
+- Search: `https://search.maven.org/solrsearch/select`
+- Artifacts: Direct URLs with HEAD requests for existence
+
+### Caching Strategy
+- Metadata: 1 hour TTL
+- Search results: 15 minutes TTL
+- Cache keys include all relevant parameters
+
+### Security Scanning
+- Trivy integration for vulnerability detection
+- Graceful degradation if Trivy not installed
+- JSON output parsing for structured results
