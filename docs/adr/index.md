@@ -15,6 +15,7 @@ Optimized ADR Index for Agent Context
 | 007 | Service Layer Architecture          | acc    | [ADR-007](007-service-layer-architecture.md) |
 | 008 | Mock-Based Testing Strategy         | acc    | [ADR-008](008-mock-based-testing-strategy.md) |
 | 009 | External Tool Integration Pattern   | acc    | [ADR-009](009-external-tool-integration-pattern.md) |
+| 010 | Dependency Management Strategy      | acc    | [ADR-010](010-dependency-management-strategy.md) |
 
 ## ADR Records
 
@@ -184,4 +185,26 @@ implementation: |
 tradeoffs:
 positive: \[leverage existing tools, maintainable, up-to-date scanning]
 negative: \[external dependency, subprocess overhead]
+```
+
+--------------------------------------------
+```yaml
+id: 010
+title: Dependency Management Strategy
+status: accepted
+date: 2025-01-24
+decision: Use FastMCP>=2.0.0 with correct import patterns and httpx for HTTP.
+why: |
+• FastMCP 2.0+ has stable APIs
+• Correct imports prevent ModuleNotFoundError
+• httpx provides better connection pooling
+• Maintain requests for compatibility
+implementation: |
+• Import from fastmcp not mcp.server.fastmcp
+• Use fastmcp.exceptions for error types
+• httpx for new HTTP code
+• Keep requests for backward compatibility
+tradeoffs:
+positive: \[clear deps, modern HTTP client, no import errors]
+negative: \[two HTTP libraries, version pinning needed]
 ```

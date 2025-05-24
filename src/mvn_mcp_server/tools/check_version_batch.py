@@ -8,7 +8,7 @@ import logging
 import concurrent.futures
 from typing import Dict, Any, List
 
-from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
+from fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
 from mvn_mcp_server.shared.data_types import (
     ErrorCode,

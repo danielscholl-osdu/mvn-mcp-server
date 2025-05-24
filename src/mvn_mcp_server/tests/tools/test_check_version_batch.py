@@ -7,7 +7,7 @@ dependencies in a single request.
 import pytest
 from unittest.mock import patch
 
-from mcp.server.fastmcp.exceptions import ValidationError, ResourceError, ToolError
+from fastmcp.exceptions import ValidationError, ResourceError, ToolError
 
 from mvn_mcp_server.tools.check_version_batch import (
     check_version_batch,

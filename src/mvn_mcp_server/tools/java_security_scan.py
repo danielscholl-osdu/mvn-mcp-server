@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
-from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
+from fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
 from mvn_mcp_server.shared.data_types import (
     ErrorCode,

@@ -4,7 +4,7 @@ This module tests the utility functions in the mvn_mcp_server.shared.utils modul
 """
 
 import pytest
-from mcp.server.fastmcp.exceptions import ValidationError
+from fastmcp.exceptions import ValidationError
 
 from mvn_mcp_server.shared.utils import (
     validate_maven_dependency,

@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from typing import Dict, Any, List, Optional, Tuple
 
 import requests
-from mcp.server.fastmcp.exceptions import ResourceError
+from fastmcp.exceptions import ResourceError
 
 from mvn_mcp_server.shared.data_types import ErrorCode
 from mvn_mcp_server.services.cache import MavenCache

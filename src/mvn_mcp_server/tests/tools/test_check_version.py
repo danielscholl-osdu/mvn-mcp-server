@@ -7,7 +7,7 @@ comprehensive version information.
 import pytest
 from unittest.mock import patch
 
-from mcp.server.fastmcp.exceptions import ValidationError, ResourceError, ToolError
+from fastmcp.exceptions import ValidationError, ResourceError, ToolError
 
 from mvn_mcp_server.tools.check_version import check_version, _get_latest_component_versions
 from mvn_mcp_server.services.maven_api import MavenApiService

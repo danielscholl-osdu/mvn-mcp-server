@@ -11,7 +11,7 @@ from typing import Dict, Any
 
 from mvn_mcp_server.shared.data_types import ErrorCode
 from mvn_mcp_server.services.response import format_success_response, format_error_response
-from mcp.server.fastmcp.exceptions import ValidationError, ResourceError
+from fastmcp.exceptions import ValidationError, ResourceError
 
 # Set up logging
 logger = logging.getLogger("mvn-mcp-server")
