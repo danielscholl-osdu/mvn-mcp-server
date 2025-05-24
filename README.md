@@ -1,6 +1,38 @@
 # Maven MCP Server
 
-A Model Context Protocol (MCP) server that provides tools for working with Maven dependencies, specifically for checking if specific versions of dependencies exist in the Maven Central repository, retrieving the latest versions, and finding the latest version based on semantic versioning components.
+[![CI](https://github.com/danielscholl-osdu/mvn-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/danielscholl-osdu/mvn-mcp-server/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/danielscholl-osdu/mvn-mcp-server)](https://github.com/danielscholl-osdu/mvn-mcp-server/releases)
+[![Python](https://img.shields.io/badge/python-3.12%20|%203.13-blue)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-green)](https://modelcontextprotocol.io)
+
+A Model Context Protocol (MCP) server that provides AI assistants with powerful tools for Maven dependency management, including version checking, security scanning, and comprehensive dependency analysis.
+
+## Purpose
+
+This server enables AI assistants to interact with Maven Central repository through natural language, providing comprehensive dependency management capabilities including version checking, batch processing, security vulnerability scanning, and intelligent version recommendations.
+
+## AI-Driven Development
+
+[![AI-Driven](https://img.shields.io/badge/AI--Driven-Development-blueviolet)](https://github.com/danielscholl-osdu/mvn-mcp-server/blob/main/AI_EVOLUTION.md)
+[![Copilot-Ready](https://img.shields.io/badge/GitHub%20Copilot-Ready-8A2BE2?logo=github)](https://github.com/danielscholl-osdu/mvn-mcp-server/blob/main/.github/copilot-instructions.md)
+
+This project follows an AI-driven development workflow:
+- 🤖 **Built with AI** - Developed using Claude Code and GitHub Copilot
+- 📋 **AI Task Assignment** - Issues labeled with `copilot` are automatically assigned
+- 📚 **AI-Friendly Documentation** - Comprehensive guides for AI agents in [CLAUDE.md](CLAUDE.md) and [.github/copilot-instructions.md](.github/copilot-instructions.md)
+- 🔄 **Multi-Agent Orchestration** - Different AI agents handle different tasks based on their strengths
+- 🧠 **AI Evolution Tracking** - Development insights captured in [AI_EVOLUTION.md](AI_EVOLUTION.md)
+
+## Documentation
+
+- [Project Brief](docs/project-brief.md) - Executive summary and design philosophy
+- [Project Requirements](docs/project-prd.md) - Comprehensive product requirements
+- [Architecture Overview](docs/project-architect.md) - Technical architecture details
+- [Architecture Design Decisions](docs/adr/index.md) - ADR catalog with decision rationale
+- [AI Evolution Log](AI_EVOLUTION.md) - Project evolution story for AI understanding
 
 ## Setup
 
