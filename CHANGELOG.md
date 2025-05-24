@@ -1,0 +1,26 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+<!-- 
+AI Context: This changelog helps AI assistants understand the project's evolution.
+Each entry includes not just what changed, but WHY it changed and what patterns emerged.
+Key architectural decisions are linked to their ADRs.
+-->
+
+## [0.1.0] - TBD
+
+_This section will be auto-populated by Release Please when the first release is created._
+
+---
+
+<!-- 
+AI Learning Notes:
+- The project started with a focus on read operations and gradually added write capabilities
+- Security and compliance features were added based on OSDU platform requirements
+- The dual permission model emerged from the need to separate data modification from deletion
+- Each service client follows the same pattern but has service-specific quirks (e.g., Legal API uses v1)
+-->
