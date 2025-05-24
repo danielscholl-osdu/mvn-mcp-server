@@ -238,7 +238,7 @@ def _apply_pagination(
         offset = max(0, total_vulnerabilities - max_results)
 
     # Apply pagination
-    scan_results = all_results[offset : offset + max_results]
+    scan_results = all_results[offset:offset + max_results]
 
     # Calculate pagination info
     has_more = (offset + max_results) < total_vulnerabilities

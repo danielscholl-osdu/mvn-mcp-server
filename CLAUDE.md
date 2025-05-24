@@ -82,7 +82,7 @@ uv run pytest                    # Run all tests
 uv run pytest -xvs              # Run tests, stop on first failure
 uv run mypy .                   # Type checking
 uv run flake8 src/              # Linting
-uv run black src/ tests/        # Format code
+uv run black src/               # Format code
 
 # Development workflow
 uv sync                         # Sync dependencies
