@@ -42,13 +42,13 @@ Use **FastMCP** framework for implementing the MCP server.
 ## Implementation Notes
 ```python
 # Simple tool registration pattern
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
-mcp = FastMCP("OSDU MCP Server")
+mcp = FastMCP("Maven MCP Server")
 
 @mcp.tool()
-async def health_check() -> dict:
-    return {"status": "healthy"}
+def check_version(dependency: str, version: str) -> dict:
+    return {"exists": True, "version": version}
 ```
 
 ## Success Criteria

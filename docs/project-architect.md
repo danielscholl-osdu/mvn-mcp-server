@@ -41,9 +41,10 @@ This document covers:
 
 ### 2.3. Technology Stack
 - **Runtime**: Python 3.12+
-- **MCP Framework**: FastMCP
+- **MCP Framework**: FastMCP (>=2.0.0)
 - **Validation**: Pydantic v2
-- **HTTP Client**: httpx (sync) for Maven Central API
+- **HTTP Client**: httpx (>=0.27.0) - direct dependency for Maven Central API
+- **HTTP Library**: requests (>=2.32.3) - for compatibility
 - **Testing**: pytest with unittest.mock
 - **Package Management**: UV
 
@@ -258,7 +259,7 @@ def format_error_response(tool_name: str, error_code: str,
 
 **Server Setup (server.py):**
 ```python
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 # Initialize FastMCP server
 mcp = FastMCP(

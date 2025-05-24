@@ -18,7 +18,7 @@ Maven MCP Server provides Model Context Protocol access to Maven Central reposit
 - Follow PEP 8 conventions for naming and formatting
 - Use docstrings with Args/Returns/Raises sections in Google style
 - Group imports: stdlib, third-party, local
-- Error handling: Use specific exceptions from mcp.server.fastmcp.exceptions
+- Error handling: Use specific exceptions from fastmcp.exceptions
 - Class naming: PascalCase
 - Function/variable naming: snake_case
 - Use Pydantic models for data validation
