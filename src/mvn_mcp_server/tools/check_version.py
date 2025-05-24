@@ -7,7 +7,7 @@ and retrieve all version updates in a single call.
 import logging
 from typing import Dict, Any, Optional, Tuple
 
-from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
+from fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
 from mvn_mcp_server.shared.data_types import ErrorCode
 from mvn_mcp_server.shared.utils import (

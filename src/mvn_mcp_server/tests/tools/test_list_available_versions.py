@@ -8,7 +8,7 @@ Maven dependency, grouped by minor version tracks.
 import pytest
 from unittest.mock import patch
 
-from mcp.server.fastmcp.exceptions import ValidationError, ResourceError, ToolError
+from fastmcp.exceptions import ValidationError, ResourceError, ToolError
 
 from mvn_mcp_server.tools.list_available_versions import list_available_versions
 from mvn_mcp_server.shared.data_types import ErrorCode

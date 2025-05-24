@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 from mvn_mcp_server.services.maven_api import MavenApiService
 from mvn_mcp_server.services.cache import MavenCache
-from mcp.server.fastmcp.exceptions import ResourceError
+from fastmcp.exceptions import ResourceError
 
 
 class TestMavenApiService(unittest.TestCase):

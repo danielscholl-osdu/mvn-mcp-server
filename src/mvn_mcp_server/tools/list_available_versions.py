@@ -7,7 +7,7 @@ versions of a Maven dependency, grouped by minor version tracks.
 import logging
 from typing import Dict, Any, Optional, List
 
-from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
+from fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
 from mvn_mcp_server.shared.data_types import ErrorCode
 from mvn_mcp_server.shared.utils import (

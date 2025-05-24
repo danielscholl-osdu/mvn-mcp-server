@@ -5,7 +5,7 @@ This module creates and configures the FastMCP server instance for the Maven MCP
 
 import logging
 from typing import List, Dict, Any, Optional
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 # Import the consolidated tools
 from mvn_mcp_server.tools.check_version import check_version

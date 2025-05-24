@@ -7,7 +7,7 @@ import re
 import functools
 from typing import Dict, Any, Optional, List
 
-from mcp.server.fastmcp.exceptions import ValidationError
+from fastmcp.exceptions import ValidationError
 
 from mvn_mcp_server.shared.data_types import ErrorCode
 
