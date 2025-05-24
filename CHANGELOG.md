@@ -11,6 +11,14 @@ Each entry includes not just what changed, but WHY it changed and what patterns 
 Key architectural decisions are linked to their ADRs.
 -->
 
+## [0.1.3](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.2...v0.1.3) (2025-05-24)
+
+
+### Bug Fixes
+
+* **ci:** resolve black and flake8 E203 conflict ([36ed1a1](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/36ed1a156f2a02701b81d3871cc3e94e85544040))
+* **ci:** resolve black and flake8 E203 conflict ([35b3260](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/35b3260eea23cd7eef6221f1322cf4d20e53b089))
+
 ## [0.1.2](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.1...v0.1.2) (2025-05-24)
 
 
