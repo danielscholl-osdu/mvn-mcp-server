@@ -60,8 +60,12 @@ class TestVersionService(unittest.TestCase):
         """Test version comparison with qualifiers."""
         self.assertEqual(VersionService.compare_versions("1.2.3", "1.2.3-SNAPSHOT"), 1)
         self.assertEqual(VersionService.compare_versions("1.2.3-SNAPSHOT", "1.2.3"), -1)
-        self.assertEqual(VersionService.compare_versions("1.2.3-alpha", "1.2.3-beta"), -1)
-        self.assertEqual(VersionService.compare_versions("1.2.3-beta", "1.2.3-alpha"), 1)
+        self.assertEqual(
+            VersionService.compare_versions("1.2.3-alpha", "1.2.3-beta"), -1
+        )
+        self.assertEqual(
+            VersionService.compare_versions("1.2.3-beta", "1.2.3-alpha"), 1
+        )
         self.assertEqual(VersionService.compare_versions("1.2.3-rc1", "1.2.3-beta2"), 1)
         self.assertEqual(VersionService.compare_versions("1.2.3.Final", "1.2.3"), 1)
 
@@ -119,8 +123,12 @@ class TestVersionService(unittest.TestCase):
     def test_filter_versions_snapshots(self):
         """Test filtering out SNAPSHOT and pre-release versions."""
         versions = [
-            "1.0.0", "1.0.0-SNAPSHOT", "1.0.0-alpha", "1.0.0-beta",
-            "1.0.0-rc1", "1.0.1"
+            "1.0.0",
+            "1.0.0-SNAPSHOT",
+            "1.0.0-alpha",
+            "1.0.0-beta",
+            "1.0.0-rc1",
+            "1.0.1",
         ]
         filtered = VersionService.filter_versions(versions, "patch", "1.0.0")
         # Pre-release versions should be filtered out
@@ -146,10 +154,7 @@ class TestVersionService(unittest.TestCase):
 
     def test_get_latest_version_qualifier_order(self):
         """Test latest version with different qualifiers."""
-        versions = [
-            "1.0.0-alpha", "1.0.0-beta", "1.0.0-rc1",
-            "1.0.0", "1.0.0.Final"
-        ]
+        versions = ["1.0.0-alpha", "1.0.0-beta", "1.0.0-rc1", "1.0.0", "1.0.0.Final"]
         latest = VersionService.get_latest_version(versions)
         self.assertEqual(latest, "1.0.0.Final")  # Final is higher than release
 
@@ -160,7 +165,9 @@ class TestVersionService(unittest.TestCase):
         self.assertFalse(VersionService.is_date_based_version("1.2.3"))
         self.assertFalse(VersionService.is_date_based_version("5"))
         self.assertFalse(VersionService.is_date_based_version(""))
-        self.assertFalse(VersionService.is_date_based_version("12345"))  # Not in year range
+        self.assertFalse(
+            VersionService.is_date_based_version("12345")
+        )  # Not in year range
 
 
 if __name__ == "__main__":

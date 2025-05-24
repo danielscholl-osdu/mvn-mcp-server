@@ -10,7 +10,7 @@ from mvn_mcp_server.shared.utils import (
     validate_maven_dependency,
     validate_version_string,
     determine_packaging,
-    format_error_response
+    format_error_response,
 )
 from mvn_mcp_server.shared.data_types import ErrorCode
 
@@ -20,7 +20,9 @@ class TestValidateMavenDependency:
 
     def test_valid_dependency(self):
         """Test with a valid dependency string."""
-        group_id, artifact_id = validate_maven_dependency("org.springframework:spring-core")
+        group_id, artifact_id = validate_maven_dependency(
+            "org.springframework:spring-core"
+        )
         assert group_id == "org.springframework"
         assert artifact_id == "spring-core"
 
@@ -86,7 +88,9 @@ class TestFormatErrorResponse:
 
     def test_basic_error_response(self):
         """Test formatting a basic error response."""
-        response = format_error_response(ErrorCode.INVALID_INPUT_FORMAT, "Invalid input")
+        response = format_error_response(
+            ErrorCode.INVALID_INPUT_FORMAT, "Invalid input"
+        )
         assert response["error"]["code"] == ErrorCode.INVALID_INPUT_FORMAT
         assert response["error"]["message"] == "Invalid input"
         assert "details" not in response["error"]
@@ -95,9 +99,7 @@ class TestFormatErrorResponse:
         """Test formatting an error response with details."""
         details = {"field": "dependency", "issue": "missing groupId"}
         response = format_error_response(
-            ErrorCode.INVALID_INPUT_FORMAT,
-            "Invalid input",
-            details
+            ErrorCode.INVALID_INPUT_FORMAT, "Invalid input", details
         )
         assert response["error"]["code"] == ErrorCode.INVALID_INPUT_FORMAT
         assert response["error"]["message"] == "Invalid input"

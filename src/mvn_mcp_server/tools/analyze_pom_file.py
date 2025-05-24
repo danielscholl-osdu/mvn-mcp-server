@@ -10,7 +10,10 @@ from pathlib import Path
 from typing import Dict, Any
 
 from mvn_mcp_server.shared.data_types import ErrorCode
-from mvn_mcp_server.services.response import format_success_response, format_error_response
+from mvn_mcp_server.services.response import (
+    format_success_response,
+    format_error_response,
+)
 from fastmcp.exceptions import ValidationError, ResourceError
 
 # Set up logging
@@ -65,10 +68,14 @@ def parse_pom_xml(pom_path: str) -> Dict[str, Any]:
         # Extract modules (if any)
         modules_elem = root.findall("./mvn:modules/mvn:module", ns)
         if modules_elem:
-            project_info["modules"] = [module.text for module in modules_elem if module.text]
+            project_info["modules"] = [
+                module.text for module in modules_elem if module.text
+            ]
 
         # Extract profiles
-        project_info["profiles"] = _extract_profiles(root, ns, project_info["properties"])
+        project_info["profiles"] = _extract_profiles(
+            root, ns, project_info["properties"]
+        )
 
         return project_info
 
@@ -109,7 +116,9 @@ def _extract_parent(root, ns):
             "group_id": _get_element_text(parent_elem, "./mvn:groupId", ns),
             "artifact_id": _get_element_text(parent_elem, "./mvn:artifactId", ns),
             "version": _get_element_text(parent_elem, "./mvn:version", ns),
-            "relative_path": _get_element_text(parent_elem, "./mvn:relativePath", ns, "../pom.xml"),
+            "relative_path": _get_element_text(
+                parent_elem, "./mvn:relativePath", ns, "../pom.xml"
+            ),
         }
     return None
 
@@ -156,7 +165,8 @@ def _extract_dependencies(root, ns, properties):
                     "scope": _get_element_text(dep, "./mvn:scope", ns, "compile"),
                     "classifier": _get_element_text(dep, "./mvn:classifier", ns),
                     "type": _get_element_text(dep, "./mvn:type", ns, "jar"),
-                    "optional": _get_element_text(dep, "./mvn:optional", ns, "false") == "true",
+                    "optional": _get_element_text(dep, "./mvn:optional", ns, "false")
+                    == "true",
                     "exclusions": _extract_exclusions(dep, ns),
                 }
             )
@@ -251,7 +261,9 @@ def _extract_activation(profile, ns):
     act_elem = profile.find("./mvn:activation", ns)
 
     if act_elem is not None:
-        activation["active_by_default"] = _get_element_text(act_elem, "./mvn:activeByDefault", ns, "false") == "true"
+        activation["active_by_default"] = (
+            _get_element_text(act_elem, "./mvn:activeByDefault", ns, "false") == "true"
+        )
 
         # Extract JDK activation
         jdk = _get_element_text(act_elem, "./mvn:jdk", ns)
@@ -304,7 +316,11 @@ def check_vulnerability_databases():
 
             # Here we could implement checking against known vulnerability databases
             # For now, we just check a few well-known vulnerabilities
-            if artifact_id == "log4j-core" and version.startswith("2.") and version < "2.15.0":
+            if (
+                artifact_id == "log4j-core"
+                and version.startswith("2.")
+                and version < "2.15.0"
+            ):
                 return True  # Log4Shell vulnerability check works
 
         return False
@@ -313,7 +329,9 @@ def check_vulnerability_databases():
         return False
 
 
-def analyze_pom_file(pom_path: str, include_vulnerability_check: bool = True) -> Dict[str, Any]:
+def analyze_pom_file(
+    pom_path: str, include_vulnerability_check: bool = True
+) -> Dict[str, Any]:
     """Analyze a Maven POM file for dependencies and potential vulnerabilities.
 
     Args:
@@ -372,7 +390,9 @@ def analyze_pom_file(pom_path: str, include_vulnerability_check: bool = True) ->
         if include_vulnerability_check:
             # Basic check for known vulnerable dependencies
             # This is a simplified check - in a real implementation, you'd check against a CVE database
-            known_vulnerabilities = _check_for_known_vulnerabilities(pom_data.get("dependencies", []))
+            known_vulnerabilities = _check_for_known_vulnerabilities(
+                pom_data.get("dependencies", [])
+            )
             analysis_result["known_vulnerable_dependencies"] = known_vulnerabilities
 
         return format_success_response(tool_name, analysis_result)
@@ -380,20 +400,18 @@ def analyze_pom_file(pom_path: str, include_vulnerability_check: bool = True) ->
     except ValidationError as e:
         # Re-raise validation errors
         logger.error(f"Validation error: {str(e)}")
-        return format_error_response(
-            tool_name, ErrorCode.INVALID_INPUT_FORMAT, str(e)
-        )
+        return format_error_response(tool_name, ErrorCode.INVALID_INPUT_FORMAT, str(e))
     except ResourceError as e:
         # Handle resource errors
         logger.error(f"Resource error: {str(e)}")
-        return format_error_response(
-            tool_name, ErrorCode.MAVEN_ERROR, str(e)
-        )
+        return format_error_response(tool_name, ErrorCode.MAVEN_ERROR, str(e))
     except Exception as e:
         # Handle unexpected errors
         logger.error(f"Unexpected error in POM file analysis: {str(e)}")
         return format_error_response(
-            tool_name, ErrorCode.INTERNAL_SERVER_ERROR, f"Error in POM file analysis: {str(e)}"
+            tool_name,
+            ErrorCode.INTERNAL_SERVER_ERROR,
+            f"Error in POM file analysis: {str(e)}",
         )
 
 
@@ -447,7 +465,10 @@ def _check_for_known_vulnerabilities(dependencies):
                 )
 
         # Check for Jackson Databind vulnerability
-        if group_id == "com.fasterxml.jackson.core" and artifact_id == "jackson-databind":
+        if (
+            group_id == "com.fasterxml.jackson.core"
+            and artifact_id == "jackson-databind"
+        ):
             if version < "2.9.10.7":
                 known_vulnerabilities.append(
                     {
@@ -458,7 +479,9 @@ def _check_for_known_vulnerabilities(dependencies):
                         "severity": "HIGH",
                         "description": "Multiple deserialization vulnerabilities in Jackson Databind",
                         "recommendation": "Update to version 2.9.10.7 or later",
-                        "links": ["https://github.com/FasterXML/jackson-databind/security/advisories"],
+                        "links": [
+                            "https://github.com/FasterXML/jackson-databind/security/advisories"
+                        ],
                     }
                 )
 

@@ -16,15 +16,13 @@ from mvn_mcp_server.tools.analyze_pom_file import analyze_pom_file
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("mvn-mcp-server")
 
 # Create FastMCP server instance with descriptions
 mcp = FastMCP(
-    "mvn MCP Server",
-    description="A server providing tools for mvn OSDU assistant"
+    "mvn MCP Server", description="A server providing tools for mvn OSDU assistant"
 )
 
 # Register new consolidated tools
@@ -33,7 +31,12 @@ mcp = FastMCP(
 @mcp.tool(
     description="Check a Maven version and get all version update information in a single call"
 )
-def check_version_tool(dependency: str, version: str, packaging: str = "jar", classifier: Optional[str] = None):
+def check_version_tool(
+    dependency: str,
+    version: str,
+    packaging: str = "jar",
+    classifier: Optional[str] = None,
+):
     """Check a Maven dependency version and provide comprehensive version information.
 
     This consolidated tool checks if a version exists and simultaneously provides
@@ -53,7 +56,9 @@ def check_version_tool(dependency: str, version: str, packaging: str = "jar", cl
     """
     logger.info(f"MCP call to consolidated check_version with: {dependency}, {version}")
     result = check_version(dependency, version, packaging, classifier)
-    logger.info(f"Result summary: {dependency} v{version} exists={result.get('result', {}).get('exists', False)}")
+    logger.info(
+        f"Result summary: {dependency} v{version} exists={result.get('result', {}).get('exists', False)}"
+    )
     return result
 
 
@@ -78,13 +83,17 @@ def check_version_batch_tool(dependencies: List[Dict[str, Any]]):
         - Summary statistics (total, success, failed, updates available)
         - Detailed information for each dependency
     """
-    logger.info(f"MCP call to batch check_version with {len(dependencies)} dependencies")
+    logger.info(
+        f"MCP call to batch check_version with {len(dependencies)} dependencies"
+    )
     result = check_version_batch(dependencies)
     summary = result.get("result", {}).get("summary", {})
-    logger.info(f"Batch result summary: {summary.get('success', 0)}/{summary.get('total', 0)} successful, "
-                f"updates available: major={summary.get('updates_available', {}).get('major', 0)}, "
-                f"minor={summary.get('updates_available', {}).get('minor', 0)}, "
-                f"patch={summary.get('updates_available', {}).get('patch', 0)}")
+    logger.info(
+        f"Batch result summary: {summary.get('success', 0)}/{summary.get('total', 0)} successful, "
+        f"updates available: major={summary.get('updates_available', {}).get('major', 0)}, "
+        f"minor={summary.get('updates_available', {}).get('minor', 0)}, "
+        f"patch={summary.get('updates_available', {}).get('patch', 0)}"
+    )
     return result
 
 
@@ -96,7 +105,7 @@ def list_available_versions_tool(
     version: str,
     packaging: str = "jar",
     classifier: Optional[str] = None,
-    include_all_versions: bool = False
+    include_all_versions: bool = False,
 ):
     """List all available versions of a Maven dependency grouped by minor tracks.
 
@@ -120,23 +129,29 @@ def list_available_versions_tool(
         - All minor version tracks with their latest versions
         - Full version lists for selected tracks based on include_all_versions
     """
-    logger.info(f"MCP call to list_available_versions with: {dependency}, {version}, include_all={include_all_versions}")
+    logger.info(
+        f"MCP call to list_available_versions with: {dependency}, {version}, include_all={include_all_versions}"
+    )
     result = list_available_versions(
-        dependency,
-        version,
-        packaging,
-        classifier,
-        include_all_versions
+        dependency, version, packaging, classifier, include_all_versions
     )
 
     # Log info about the result
     minor_tracks = result.get("result", {}).get("minor_tracks", {})
     track_count = len(minor_tracks)
-    current_track = next((track for track, info in minor_tracks.items()
-                          if info.get("is_current_track", False)), "none")
+    current_track = next(
+        (
+            track
+            for track, info in minor_tracks.items()
+            if info.get("is_current_track", False)
+        ),
+        "none",
+    )
 
-    logger.info(f"Found {track_count} minor version tracks for {dependency}, "
-                f"current track: {current_track}")
+    logger.info(
+        f"Found {track_count} minor version tracks for {dependency}, "
+        f"current track: {current_track}"
+    )
 
     return result
 
@@ -152,7 +167,7 @@ def scan_java_project_tool(
     pom_file: Optional[str] = None,
     severity_filter: Optional[List[str]] = None,
     max_results: int = 100,
-    offset: int = 0
+    offset: int = 0,
 ):
     """Scan a Java project for vulnerabilities and provide detailed security information.
 
@@ -194,7 +209,7 @@ def scan_java_project_tool(
         pom_file,
         severity_filter,
         max_results,
-        offset
+        offset,
     )
 
     if result.get("status") == "success":
@@ -205,14 +220,18 @@ def scan_java_project_tool(
 
         logger.info(f"Java security scan completed in {scan_mode} mode.")
         logger.info(f"Vulnerabilities found: {vuln_found}, total: {total}")
-        logger.info(f"Severity breakdown: critical={severity_counts.get('critical', 0)}, "
-                    f"high={severity_counts.get('high', 0)}, "
-                    f"medium={severity_counts.get('medium', 0)}, "
-                    f"low={severity_counts.get('low', 0)}")
+        logger.info(
+            f"Severity breakdown: critical={severity_counts.get('critical', 0)}, "
+            f"high={severity_counts.get('high', 0)}, "
+            f"medium={severity_counts.get('medium', 0)}, "
+            f"low={severity_counts.get('low', 0)}"
+        )
     else:
         error_code = result.get("error", {}).get("code", "unknown")
         error_msg = result.get("error", {}).get("message", "Unknown error")
-        logger.error(f"Java security scan failed with error: {error_code} - {error_msg}")
+        logger.error(
+            f"Java security scan failed with error: {error_code} - {error_msg}"
+        )
 
     return result
 
@@ -246,10 +265,14 @@ def analyze_pom_file_tool(pom_file_path: str, include_vulnerability_check: bool 
 
     if result.get("status") == "success":
         dependency_count = result.get("result", {}).get("dependency_count", 0)
-        vulnerable_count = len(result.get("result", {}).get("known_vulnerable_dependencies", []))
+        vulnerable_count = len(
+            result.get("result", {}).get("known_vulnerable_dependencies", [])
+        )
 
         logger.info(f"POM analysis completed for {pom_file_path}")
-        logger.info(f"Found {dependency_count} dependencies, {vulnerable_count} with known vulnerabilities")
+        logger.info(
+            f"Found {dependency_count} dependencies, {vulnerable_count} with known vulnerabilities"
+        )
     else:
         error_code = result.get("error", {}).get("code", "unknown")
         error_msg = result.get("error", {}).get("message", "Unknown error")

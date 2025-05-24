@@ -17,9 +17,12 @@ from mvn_mcp_server.shared.data_types import (
     ErrorCode,
     JavaVulnerability,
     JavaSecurityScanResult,
-    JavaPaginationInfo
+    JavaPaginationInfo,
 )
-from mvn_mcp_server.services.response import format_success_response, format_error_response
+from mvn_mcp_server.services.response import (
+    format_success_response,
+    format_error_response,
+)
 
 # Set up logging
 logger = logging.getLogger("mvn-mcp-server")
@@ -37,7 +40,7 @@ def check_trivy_availability() -> bool:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            check=False
+            check=False,
         )
 
         return result.returncode == 0
@@ -50,7 +53,7 @@ def _validate_scan_inputs(
     workspace: str,
     scan_mode: str,
     pom_file: Optional[str],
-    severity_filter: Optional[List[str]]
+    severity_filter: Optional[List[str]],
 ) -> tuple[Path, Path, str, List[str]]:
     """Validate and prepare scan inputs.
 
@@ -67,7 +70,9 @@ def _validate_scan_inputs(
     # Validate scan_mode parameter
     valid_scan_modes = ["workspace", "pom_only"]
     if scan_mode not in valid_scan_modes:
-        raise ValidationError(f"Invalid scan_mode: {scan_mode}. Must be one of {valid_scan_modes}")
+        raise ValidationError(
+            f"Invalid scan_mode: {scan_mode}. Must be one of {valid_scan_modes}"
+        )
 
     # Set default severity filter if none provided
     if severity_filter is None:
@@ -84,7 +89,9 @@ def _validate_scan_inputs(
     else:
         pom_path = workspace_path / "pom.xml"
         if not pom_path.exists():
-            raise ValidationError(f"Not a Maven project - no pom.xml found in {workspace}")
+            raise ValidationError(
+                f"Not a Maven project - no pom.xml found in {workspace}"
+            )
         target_path = workspace_path
         scan_mode_desc = "trivy"
 
@@ -96,20 +103,26 @@ def _validate_severity_filter(severity_filter: List[str]) -> None:
     valid_severities = ["critical", "high", "medium", "low", "unknown"]
     for severity in severity_filter:
         if severity.lower() not in valid_severities:
-            raise ValidationError(f"Invalid severity: {severity}. Must be one of {valid_severities}")
+            raise ValidationError(
+                f"Invalid severity: {severity}. Must be one of {valid_severities}"
+            )
 
 
 def _run_trivy_scan(target_path: Path) -> Dict[str, Any]:
     """Run Trivy scan and return parsed results."""
-    with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as temp_file:
         output_file = temp_file.name
 
         trivy_cmd = [
-            "trivy", "fs",
-            "--security-checks", "vuln",
-            "--format", "json",
-            "--output", output_file,
-            str(target_path)
+            "trivy",
+            "fs",
+            "--security-checks",
+            "vuln",
+            "--format",
+            "json",
+            "--output",
+            output_file,
+            str(target_path),
         ]
 
         logger.info(f"Running Trivy command: {' '.join(trivy_cmd)}")
@@ -118,7 +131,7 @@ def _run_trivy_scan(target_path: Path) -> Dict[str, Any]:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            check=False
+            check=False,
         )
 
         if result.returncode != 0:
@@ -126,7 +139,7 @@ def _run_trivy_scan(target_path: Path) -> Dict[str, Any]:
             raise ResourceError(f"Trivy scan failed: {result.stderr}")
 
         try:
-            with open(output_file, 'r') as f:
+            with open(output_file, "r") as f:
                 trivy_data = json.load(f)
             return trivy_data
         except Exception as e:
@@ -136,8 +149,7 @@ def _run_trivy_scan(target_path: Path) -> Dict[str, Any]:
 
 
 def _process_trivy_results(
-    trivy_data: Dict[str, Any],
-    severity_filter: List[str]
+    trivy_data: Dict[str, Any], severity_filter: List[str]
 ) -> List[JavaVulnerability]:
     """Process Trivy scan results into vulnerability records."""
     all_results = []
@@ -146,7 +158,9 @@ def _process_trivy_results(
         target_file = result.get("Target", "unknown")
 
         for vuln in result.get("Vulnerabilities", []):
-            vuln_record = _create_vulnerability_record(vuln, target_file, severity_filter)
+            vuln_record = _create_vulnerability_record(
+                vuln, target_file, severity_filter
+            )
             if vuln_record:
                 all_results.append(vuln_record)
 
@@ -154,9 +168,7 @@ def _process_trivy_results(
 
 
 def _create_vulnerability_record(
-    vuln: Dict[str, Any],
-    target_file: str,
-    severity_filter: List[str]
+    vuln: Dict[str, Any], target_file: str, severity_filter: List[str]
 ) -> Optional[JavaVulnerability]:
     """Create a vulnerability record from Trivy vulnerability data."""
     pkg_id = vuln.get("PkgID", "")
@@ -190,22 +202,20 @@ def _create_vulnerability_record(
         is_in_bom=False,
         version_source="direct",
         source_location=target_file,
-        links=[ref.get("URL", "") for ref in vuln.get("References", []) if "URL" in ref],
-        fix_available=bool(vuln.get("FixedVersion", ""))
+        links=[
+            ref.get("URL", "") for ref in vuln.get("References", []) if "URL" in ref
+        ],
+        fix_available=bool(vuln.get("FixedVersion", "")),
     )
 
     return vuln_record
 
 
-def _calculate_severity_counts(vulnerabilities: List[JavaVulnerability]) -> Dict[str, int]:
+def _calculate_severity_counts(
+    vulnerabilities: List[JavaVulnerability],
+) -> Dict[str, int]:
     """Calculate severity counts from vulnerability results."""
-    severity_counts = {
-        "critical": 0,
-        "high": 0,
-        "medium": 0,
-        "low": 0,
-        "unknown": 0
-    }
+    severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0, "unknown": 0}
 
     for vulnerability in vulnerabilities:
         severity = vulnerability.severity.lower()
@@ -216,9 +226,7 @@ def _calculate_severity_counts(vulnerabilities: List[JavaVulnerability]) -> Dict
 
 
 def _apply_pagination(
-    all_results: List[JavaVulnerability],
-    offset: int,
-    max_results: int
+    all_results: List[JavaVulnerability], offset: int, max_results: int
 ) -> tuple[List[JavaVulnerability], JavaPaginationInfo]:
     """Apply pagination to results and return paginated data with pagination info."""
     total_vulnerabilities = len(all_results)
@@ -230,7 +238,7 @@ def _apply_pagination(
         offset = max(0, total_vulnerabilities - max_results)
 
     # Apply pagination
-    scan_results = all_results[offset:offset + max_results]
+    scan_results = all_results[offset : offset + max_results]
 
     # Calculate pagination info
     has_more = (offset + max_results) < total_vulnerabilities
@@ -239,7 +247,7 @@ def _apply_pagination(
         offset=offset,
         max_results=max_results,
         total_results=total_vulnerabilities,
-        has_more=has_more
+        has_more=has_more,
     )
 
     return scan_results, pagination_info
@@ -252,12 +260,18 @@ def _handle_scan_error(e: Exception, tool_name: str) -> Dict[str, Any]:
         return format_error_response(tool_name, ErrorCode.INVALID_INPUT_FORMAT, str(e))
     elif isinstance(e, ResourceError):
         logger.error(f"Resource error: {str(e)}")
-        error_code = ErrorCode.MAVEN_ERROR if "maven" in str(e).lower() else ErrorCode.TRIVY_ERROR
+        error_code = (
+            ErrorCode.MAVEN_ERROR
+            if "maven" in str(e).lower()
+            else ErrorCode.TRIVY_ERROR
+        )
         return format_error_response(tool_name, error_code, str(e))
     else:
         logger.error(f"Unexpected error in Java security scan: {str(e)}")
         error_code = _determine_error_code(e)
-        return format_error_response(tool_name, error_code, f"Error in Java security scan: {str(e)}")
+        return format_error_response(
+            tool_name, error_code, f"Error in Java security scan: {str(e)}"
+        )
 
 
 def _determine_error_code(e: Exception) -> ErrorCode:
@@ -282,7 +296,7 @@ def scan_java_project(
     pom_file: Optional[str] = None,
     severity_filter: Optional[List[str]] = None,
     max_results: int = 100,
-    offset: int = 0
+    offset: int = 0,
 ) -> Dict[str, Any]:
     """Scan a Java project for vulnerabilities using Trivy.
 
@@ -312,13 +326,15 @@ def scan_java_project(
             include_profiles = []
 
         # Validate inputs and prepare scan parameters
-        workspace_path, target_path, scan_mode_desc, severity_filter = _validate_scan_inputs(
-            workspace, scan_mode, pom_file, severity_filter
+        workspace_path, target_path, scan_mode_desc, severity_filter = (
+            _validate_scan_inputs(workspace, scan_mode, pom_file, severity_filter)
         )
 
         # Check Trivy availability
         if not check_trivy_availability():
-            raise ResourceError("Trivy is not available. Please install Trivy to perform security scanning.")
+            raise ResourceError(
+                "Trivy is not available. Please install Trivy to perform security scanning."
+            )
 
         # Log scan parameters
         logger.info(f"Starting Java security scan for {workspace}")
@@ -336,7 +352,9 @@ def scan_java_project(
         severity_counts = _calculate_severity_counts(all_results)
 
         # Apply pagination
-        scan_results, pagination_info = _apply_pagination(all_results, offset, max_results)
+        scan_results, pagination_info = _apply_pagination(
+            all_results, offset, max_results
+        )
 
         # Log results
         total_vulnerabilities = len(all_results)
@@ -354,7 +372,7 @@ def scan_java_project(
             vulnerabilities=scan_results,
             pagination=pagination_info,
             scan_limitations=None,
-            recommendations=None
+            recommendations=None,
         )
 
         return format_success_response(tool_name, scan_result.model_dump())

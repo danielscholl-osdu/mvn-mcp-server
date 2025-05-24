@@ -13,7 +13,7 @@ from mvn_mcp_server.shared.data_types import ErrorCode
 from mvn_mcp_server.shared.utils import (
     validate_maven_dependency,
     validate_version_string,
-    determine_packaging
+    determine_packaging,
 )
 from mvn_mcp_server.services.maven_api import MavenApiService
 from mvn_mcp_server.services.version import VersionService
@@ -32,7 +32,7 @@ def list_available_versions(
     version: str,
     packaging: str = "jar",
     classifier: Optional[str] = None,
-    include_all_versions: bool = False
+    include_all_versions: bool = False,
 ) -> Dict[str, Any]:
     """List all available versions of a Maven dependency grouped by minor tracks.
 
@@ -73,11 +73,7 @@ def list_available_versions(
 
         # Check if the specific version exists
         current_exists = maven_api.check_artifact_exists(
-            group_id,
-            artifact_id,
-            validated_version,
-            actual_packaging,
-            classifier
+            group_id, artifact_id, validated_version, actual_packaging, classifier
         )
 
         # Get all available versions
@@ -88,20 +84,22 @@ def list_available_versions(
 
         # Group versions by major.minor tracks
         minor_tracks = _group_versions_by_minor_track(
-            stable_versions,
-            validated_version,
-            include_all_versions
+            stable_versions, validated_version, include_all_versions
         )
 
         # Determine the latest overall version
-        latest_version = version_service.get_latest_version(stable_versions) if stable_versions else validated_version
+        latest_version = (
+            version_service.get_latest_version(stable_versions)
+            if stable_versions
+            else validated_version
+        )
 
         # Prepare the result data
         result = {
             "current_version": validated_version,
             "current_exists": current_exists,
             "latest_version": latest_version,
-            "minor_tracks": minor_tracks
+            "minor_tracks": minor_tracks,
         }
 
         # Return success response
@@ -120,7 +118,7 @@ def list_available_versions(
         logger.error(f"Unexpected error listing available versions: {str(e)}")
         raise ToolError(
             f"Unexpected error listing available versions: {str(e)}",
-            {"error_code": ErrorCode.INTERNAL_SERVER_ERROR}
+            {"error_code": ErrorCode.INTERNAL_SERVER_ERROR},
         )
 
 
@@ -138,10 +136,21 @@ def _filter_stable_versions(versions: List[str]) -> List[str]:
     for version in versions:
         lower_version = version.lower()
         # Skip pre-release versions
-        if any(qualifier in lower_version for qualifier in [
-            "snapshot", "alpha", "beta", "rc", "-m", ".m",
-            "milestone", "preview", "incubating", "ea"
-        ]):
+        if any(
+            qualifier in lower_version
+            for qualifier in [
+                "snapshot",
+                "alpha",
+                "beta",
+                "rc",
+                "-m",
+                ".m",
+                "milestone",
+                "preview",
+                "incubating",
+                "ea",
+            ]
+        ):
             continue
         filtered_versions.append(version)
 
@@ -149,9 +158,7 @@ def _filter_stable_versions(versions: List[str]) -> List[str]:
 
 
 def _group_versions_by_minor_track(
-    versions: List[str],
-    reference_version: str,
-    include_all_versions: bool = False
+    versions: List[str], reference_version: str, include_all_versions: bool = False
 ) -> Dict[str, Dict[str, Any]]:
     """Group versions by major.minor tracks.
 
@@ -168,7 +175,9 @@ def _group_versions_by_minor_track(
 
     # Parse the reference version to determine its major.minor track
     ref_components, _ = version_service.parse_version(reference_version)
-    ref_major, ref_minor = ref_components[:2] if len(ref_components) >= 2 else (ref_components[0], 0)
+    ref_major, ref_minor = (
+        ref_components[:2] if len(ref_components) >= 2 else (ref_components[0], 0)
+    )
     ref_track = f"{ref_major}.{ref_minor}"
 
     # Group versions by major.minor track
@@ -195,13 +204,10 @@ def _group_versions_by_minor_track(
         latest_in_track = version_service.get_latest_version(track_versions)
 
         # Determine if this is the current version's track
-        is_current_track = (track == ref_track)
+        is_current_track = track == ref_track
 
         # Create the track entry
-        track_entry = {
-            "latest": latest_in_track,
-            "is_current_track": is_current_track
-        }
+        track_entry = {"latest": latest_in_track, "is_current_track": is_current_track}
 
         # Include all versions if requested
         if include_all_versions or is_current_track:
@@ -209,7 +215,7 @@ def _group_versions_by_minor_track(
             sorted_versions = sorted(
                 track_versions,
                 key=lambda v: version_service.compare_versions(v, "0.0.0"),
-                reverse=True
+                reverse=True,
             )
             track_entry["versions"] = sorted_versions
 
@@ -218,9 +224,7 @@ def _group_versions_by_minor_track(
     # Sort tracks by semantic version (newest first)
     sorted_result = {}
     for track in sorted(
-        result.keys(),
-        key=lambda t: tuple(map(int, t.split("."))),
-        reverse=True
+        result.keys(), key=lambda t: tuple(map(int, t.split("."))), reverse=True
     ):
         sorted_result[track] = result[track]
 

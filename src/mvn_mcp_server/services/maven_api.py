@@ -35,7 +35,9 @@ class MavenApiService:
         self.cache = cache or MavenCache()
         self.timeout = 10  # Default timeout in seconds
 
-    def fetch_artifact_metadata(self, group_id: str, artifact_id: str) -> Dict[str, Any]:
+    def fetch_artifact_metadata(
+        self, group_id: str, artifact_id: str
+    ) -> Dict[str, Any]:
         """Fetch Maven metadata for an artifact.
 
         Args:
@@ -59,7 +61,9 @@ class MavenApiService:
             logger.debug(f"Using cached metadata for {group_id}:{artifact_id}")
             return cached_data
 
-        logger.debug(f"Fetching metadata for {group_id}:{artifact_id} from {metadata_url}")
+        logger.debug(
+            f"Fetching metadata for {group_id}:{artifact_id} from {metadata_url}"
+        )
 
         try:
             response = requests.get(metadata_url, timeout=self.timeout)
@@ -137,7 +141,9 @@ class MavenApiService:
         group_path = group_id.replace(".", "/")
 
         # Build the URL for the direct repository check
-        base_url = f"https://repo1.maven.org/maven2/{group_path}/{artifact_id}/{version}/"
+        base_url = (
+            f"https://repo1.maven.org/maven2/{group_path}/{artifact_id}/{version}/"
+        )
         file_name = f"{artifact_id}-{version}"
 
         if classifier:
@@ -180,7 +186,9 @@ class MavenApiService:
         # Default fallback
         return False
 
-    def _check_version_in_metadata(self, group_id: str, artifact_id: str, version: str) -> bool:
+    def _check_version_in_metadata(
+        self, group_id: str, artifact_id: str, version: str
+    ) -> bool:
         """Check if a version is listed in the Maven metadata.
 
         Args:
@@ -229,7 +237,9 @@ class MavenApiService:
 
         except ResourceError as e:
             # Try fallback to Solr API
-            logger.debug(f"Metadata approach failed, trying Solr API fallback: {str(e)}")
+            logger.debug(
+                f"Metadata approach failed, trying Solr API fallback: {str(e)}"
+            )
             return self._get_versions_from_solr(group_id, artifact_id)
 
     def _get_versions_from_solr(self, group_id: str, artifact_id: str) -> List[str]:
@@ -352,7 +362,9 @@ class MavenApiService:
             if "response" in data:
                 num_found = data["response"].get("numFound", 0)
                 num_docs = len(data["response"].get("docs", []))
-                logger.debug(f"Maven Central query returned {num_found} matches, {num_docs} docs in response")
+                logger.debug(
+                    f"Maven Central query returned {num_found} matches, {num_docs} docs in response"
+                )
 
             # Cache the result (TTL: 15 minutes)
             self.cache.set(cache_key, data, ttl=900)
@@ -372,7 +384,7 @@ class MavenApiService:
         artifact_id: str,
         version: str,
         packaging: str,
-        classifier: str
+        classifier: str,
     ) -> bool:
         """Check if a specific version exists with the given classifier."""
         return self.check_artifact_exists(
@@ -385,7 +397,7 @@ class MavenApiService:
         group_id: str,
         artifact_id: str,
         packaging: str,
-        classifier: Optional[str]
+        classifier: Optional[str],
     ) -> Optional[str]:
         """Try to get the release version if available and compatible."""
         release_version = metadata.get("release_version")
@@ -408,7 +420,7 @@ class MavenApiService:
         group_id: str,
         artifact_id: str,
         packaging: str,
-        classifier: Optional[str]
+        classifier: Optional[str],
     ) -> Optional[str]:
         """Try to get the latest version if available and compatible."""
         latest_version = metadata.get("latest_version")
@@ -431,7 +443,7 @@ class MavenApiService:
         group_id: str,
         artifact_id: str,
         packaging: str,
-        classifier: Optional[str]
+        classifier: Optional[str],
     ) -> Optional[str]:
         """Find the latest version from all available versions."""
         versions = metadata.get("versions")
@@ -443,7 +455,8 @@ class MavenApiService:
         if classifier:
             # Filter versions that have the classifier
             filtered_versions = [
-                version for version in versions
+                version
+                for version in versions
                 if self._check_version_with_classifier(
                     group_id, artifact_id, version, packaging, classifier
                 )
@@ -511,7 +524,9 @@ class MavenApiService:
 
         except ResourceError:
             # If metadata approach fails, try Solr API
-            return self._get_latest_version_from_solr(group_id, artifact_id, packaging, classifier)
+            return self._get_latest_version_from_solr(
+                group_id, artifact_id, packaging, classifier
+            )
 
     def _get_latest_version_from_solr(
         self,

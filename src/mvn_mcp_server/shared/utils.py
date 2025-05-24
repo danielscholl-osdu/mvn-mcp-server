@@ -12,7 +12,9 @@ from fastmcp.exceptions import ValidationError
 from mvn_mcp_server.shared.data_types import ErrorCode
 
 
-def format_error_response(error_code: ErrorCode, error_message: str, details: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def format_error_response(
+    error_code: ErrorCode, error_message: str, details: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Format a standardized error response.
 
     Args:
@@ -23,12 +25,7 @@ def format_error_response(error_code: ErrorCode, error_message: str, details: Op
     Returns:
         Formatted error response dictionary
     """
-    response = {
-        "error": {
-            "code": error_code.value,
-            "message": error_message
-        }
-    }
+    response = {"error": {"code": error_code.value, "message": error_message}}
 
     if details:
         response["error"]["details"] = details
@@ -79,7 +76,7 @@ def validate_version_string(version: str) -> str:
 
     # Basic version validation pattern
     # Allows standard versions like 1.2.3, 1.2.3-SNAPSHOT, 1.2.3.Final, etc.
-    version_pattern = r'^[\d]+(\.[\d]+)*([-.][\w]+)*$'
+    version_pattern = r"^[\d]+(\.[\d]+)*([-.][\w]+)*$"
     if not re.match(version_pattern, version):
         raise ValidationError(f"Invalid version format: {version}")
 
@@ -116,7 +113,7 @@ def parse_version_components(version: str) -> tuple[List[int], str]:
         and qualifier is the non-numeric suffix (if any)
     """
     # Split version into numeric part and qualifier
-    match = re.match(r'^([\d]+(?:\.[\d]+)*)([-.].*)?$', version)
+    match = re.match(r"^([\d]+(?:\.[\d]+)*)([-.].*)?$", version)
     if not match:
         return [], version
 
@@ -146,6 +143,7 @@ def compare_versions(version1: str, version2: str) -> int:
     """
     # Import here to avoid circular imports
     from mvn_mcp_server.services.version import VersionService
+
     return VersionService.compare_versions(version1, version2)
 
 
@@ -178,7 +176,8 @@ def get_latest_version(versions: List[str], include_snapshots: bool = False) -> 
     def version_comparator(v1, v2):
         return compare_versions(v1, v2)
 
-    sorted_versions = sorted(filtered_versions, key=functools.cmp_to_key(version_comparator),
-                             reverse=True)
+    sorted_versions = sorted(
+        filtered_versions, key=functools.cmp_to_key(version_comparator), reverse=True
+    )
 
     return sorted_versions[0] if sorted_versions else ""

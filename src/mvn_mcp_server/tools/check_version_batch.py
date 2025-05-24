@@ -26,9 +26,7 @@ maven_api = MavenApiService()
 version_service = VersionService()
 
 
-def check_version_batch(
-    dependencies: List[Dict[str, Any]]
-) -> Dict[str, Any]:
+def check_version_batch(dependencies: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Process multiple Maven dependency version checks in a single batch request.
 
     Args:
@@ -53,11 +51,13 @@ def check_version_batch(
         if not dependencies or not isinstance(dependencies, list):
             raise ValidationError(
                 "Dependencies must be provided as a non-empty list",
-                {"error_code": ErrorCode.INVALID_INPUT_FORMAT}
+                {"error_code": ErrorCode.INVALID_INPUT_FORMAT},
             )
 
         # Log the batch request
-        logger.debug(f"Processing batch version check request with {len(dependencies)} dependencies")
+        logger.debug(
+            f"Processing batch version check request with {len(dependencies)} dependencies"
+        )
 
         # Process each dependency in parallel
         dependency_results = _process_dependencies_parallel(dependencies)
@@ -66,10 +66,7 @@ def check_version_batch(
         summary = _calculate_batch_summary(dependency_results)
 
         # Prepare the result
-        result = {
-            "summary": summary,
-            "dependencies": dependency_results
-        }
+        result = {"summary": summary, "dependencies": dependency_results}
 
         # Return success response
         return format_success_response("check_version_batch", result)
@@ -87,12 +84,12 @@ def check_version_batch(
         logger.error(f"Unexpected error in batch version check: {str(e)}")
         raise ToolError(
             f"Unexpected error in batch version check: {str(e)}",
-            {"error_code": ErrorCode.INTERNAL_SERVER_ERROR}
+            {"error_code": ErrorCode.INTERNAL_SERVER_ERROR},
         )
 
 
 def _process_dependencies_parallel(
-    dependencies: List[Dict[str, Any]]
+    dependencies: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
     """Process dependencies in parallel to improve performance.
 
@@ -139,8 +136,8 @@ def _process_dependencies_parallel(
                     "status": "error",
                     "error": {
                         "code": ErrorCode.INTERNAL_SERVER_ERROR.value,
-                        "message": str(e)
-                    }
+                        "message": str(e),
+                    },
                 }
                 # Map the error to all original positions of this dependency
                 for idx in dep_map[key]:
@@ -155,16 +152,14 @@ def _process_dependencies_parallel(
                 "status": "error",
                 "error": {
                     "code": ErrorCode.INTERNAL_SERVER_ERROR.value,
-                    "message": "Failed to process dependency"
-                }
+                    "message": "Failed to process dependency",
+                },
             }
 
     return results
 
 
-def _process_single_dependency(
-    dependency_item: Dict[str, Any]
-) -> Dict[str, Any]:
+def _process_single_dependency(dependency_item: Dict[str, Any]) -> Dict[str, Any]:
     """Process a single dependency check.
 
     Args:
@@ -187,31 +182,31 @@ def _process_single_dependency(
             return {
                 "dependency": dependency,
                 "status": "success",
-                "result": result["result"]
+                "result": result["result"],
             }
         else:
             return {
                 "dependency": dependency,
                 "status": "error",
-                "error": result.get("error", {
-                    "code": ErrorCode.INTERNAL_SERVER_ERROR.value,
-                    "message": "Unknown error"
-                })
+                "error": result.get(
+                    "error",
+                    {
+                        "code": ErrorCode.INTERNAL_SERVER_ERROR.value,
+                        "message": "Unknown error",
+                    },
+                ),
             }
     except Exception as e:
         logger.error(f"Error checking {dependency}:{version}: {str(e)}")
         return {
             "dependency": dependency,
             "status": "error",
-            "error": {
-                "code": ErrorCode.INTERNAL_SERVER_ERROR.value,
-                "message": str(e)
-            }
+            "error": {"code": ErrorCode.INTERNAL_SERVER_ERROR.value, "message": str(e)},
         }
 
 
 def _deduplicate_dependencies(
-    dependencies: List[Dict[str, Any]]
+    dependencies: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
     """Deduplicate dependencies to avoid redundant API calls.
 
@@ -233,9 +228,7 @@ def _deduplicate_dependencies(
     return unique_deps
 
 
-def _dependency_key(
-    dependency_item: Dict[str, Any]
-) -> str:
+def _dependency_key(dependency_item: Dict[str, Any]) -> str:
     """Create a unique key for a dependency object.
 
     Args:
@@ -252,7 +245,7 @@ def _dependency_key(
 
 
 def _calculate_batch_summary(
-    dependency_results: List[Dict[str, Any]]
+    dependency_results: List[Dict[str, Any]],
 ) -> Dict[str, Any]:
     """Calculate summary statistics for the batch operation.
 
@@ -282,5 +275,5 @@ def _calculate_batch_summary(
         "total": total,
         "success": success_count,
         "failed": failed_count,
-        "updates_available": updates
+        "updates_available": updates,
     }
