@@ -47,269 +47,82 @@ To use this MCP server in your projects, add the following to your `.mcp.json` f
 }
 ```
 
+## Usage
+
+The MCP server provides several tools for working with Maven dependencies and Java projects. Below are examples of how to use each tool:
+
+### Check Single Version
+
+```
+mvn:check_version_tool
+Parameters:
+- dependency: "group:artifact" (e.g., "org.apache.logging.log4j:log4j-core")
+- version: "2.17.1"
+- packaging: "jar" (optional, defaults to "jar")
+- classifier: null (optional)
+```
+
+Checks if a specific version exists and provides update information.
+
+### Batch Version Check
+
+```
+mvn:check_version_batch_tool
+Parameters:
+- dependencies: [
+    {"dependency": "org.springframework:spring-core", "version": "5.3.0"},
+    {"dependency": "com.fasterxml.jackson.core:jackson-databind", "version": "2.13.0"}
+  ]
+```
+
+Process multiple dependency checks in a single request.
+
+### List Available Versions
+
+```
+mvn:list_available_versions_tool
+Parameters:
+- dependency: "org.apache.commons:commons-lang3"
+- version: "3.12.0" (current version for context)
+- include_all_versions: false (optional)
+```
+
+Lists all available versions grouped by minor version tracks.
+
+### Scan Java Project
+
+```
+mvn:scan_java_project_tool
+Parameters:
+- workspace: "/path/to/java/project"
+- pom_file: "pom.xml" (optional, relative to workspace)
+- scan_mode: "workspace" (optional)
+- severity_filter: ["CRITICAL", "HIGH"] (optional)
+```
+
+Scans Maven projects for security vulnerabilities using Trivy.
+
+### Analyze POM File
+
+```
+mvn:analyze_pom_file_tool
+Parameters:
+- pom_file_path: "/path/to/pom.xml"
+- include_vulnerability_check: true (optional)
+```
+
+Analyzes a single POM file for dependencies and vulnerabilities.
+
 ## Available Tools
 
-This MCP server provides three core tools for working with Maven dependencies:
+### Version Management
+- **check_version_tool**: Check a Maven version and get all version update information
+- **check_version_batch_tool**: Process multiple Maven dependency version checks in a single batch
+- **list_available_versions_tool**: List all available versions grouped by minor version tracks
 
-### Check Maven Version Tool
-
-A comprehensive tool that checks a Maven version and provides all related version update information in a single call.
-
-**Tool Name:** `mvn-mcp-server__check_version_tool`
-
-**Parameters:**
-- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
-- `version`: Version string to check (e.g., "5.3.10")
-- `packaging`: (Optional) Package type (jar, war, pom, etc.), defaults to "jar"
-- `classifier`: (Optional) Classifier (e.g., "sources", "javadoc")
-
-**Usage Example:**
-
-```python
-# Through the Claude Code assistant:
-mcp__mvn-mcp-server__check_version_tool(
-    dependency="org.springframework:spring-core",
-    version="5.3.10"
-)
-
-# With optional parameters:
-mcp__mvn-mcp-server__check_version_tool(
-    dependency="org.springframework:spring-core",
-    version="5.3.10",
-    packaging="jar",
-    classifier="sources"
-)
-```
-
-**Response Format:**
-```json
-{
-  "tool_name": "check_version",
-  "status": "success",
-  "result": {
-    "exists": true,
-    "current_version": "5.3.10",
-    "latest_versions": {
-      "major": "7.0.0-M4",
-      "minor": "5.3.39",
-      "patch": "5.3.39"
-    },
-    "update_available": {
-      "major": true,
-      "minor": true,
-      "patch": true
-    }
-  }
-}
-```
-
-> **Note:** The server still maintains the original `check_maven_version`, `get_maven_latest_version`, and `find_maven_version` tools for backward compatibility, but they now use the comprehensive `check_version_tool` internally.
-
-### Check Maven Version Batch Tool
-
-A batch processing tool that checks multiple Maven dependency versions in a single request.
-
-**Tool Name:** `mvn-mcp-server__check_version_batch_tool`
-
-**Parameters:**
-- `dependencies`: A list of dependency objects, each containing:
-  - `dependency`: Maven dependency in format `groupId:artifactId`
-  - `version`: Version string to check
-  - `packaging`: (Optional) Package type, defaults to "jar"
-  - `classifier`: (Optional) Classifier
-
-**Usage Example:**
-
-```python
-# Through the Claude Code assistant:
-mcp__mvn-mcp-server__check_version_batch_tool(
-    dependencies=[
-        {
-            "dependency": "org.springframework:spring-core",
-            "version": "5.3.10"
-        },
-        {
-            "dependency": "org.apache.logging.log4j:log4j-core",
-            "version": "2.17.0",
-            "packaging": "jar"
-        },
-        {
-            "dependency": "com.fasterxml.jackson.core:jackson-databind",
-            "version": "2.14.0",
-            "packaging": "jar",
-            "classifier": "sources"
-        }
-    ]
-)
-```
-
-**Response Format:**
-```json
-{
-  "tool_name": "check_version_batch",
-  "status": "success",
-  "result": {
-    "summary": {
-      "total": 3,
-      "success": 3,
-      "failed": 0,
-      "updates_available": {
-        "major": 1,
-        "minor": 2,
-        "patch": 3
-      }
-    },
-    "dependencies": [
-      {
-        "dependency": "org.springframework:spring-core",
-        "status": "success",
-        "result": {
-          "exists": true,
-          "current_version": "5.3.10",
-          "latest_versions": {
-            "major": "7.0.0-M4",
-            "minor": "5.3.39",
-            "patch": "5.3.39"
-          },
-          "update_available": {
-            "major": true,
-            "minor": true,
-            "patch": true
-          }
-        }
-      },
-      {
-        "dependency": "org.apache.logging.log4j:log4j-core",
-        "status": "success",
-        "result": {
-          "exists": true,
-          "current_version": "2.17.0",
-          "latest_versions": {
-            "major": "2.22.1",
-            "minor": "2.22.1",
-            "patch": "2.17.2"
-          },
-          "update_available": {
-            "major": true,
-            "minor": true,
-            "patch": true
-          }
-        }
-      },
-      {
-        "dependency": "com.fasterxml.jackson.core:jackson-databind",
-        "status": "success",
-        "result": {
-          "exists": true,
-          "current_version": "2.14.0",
-          "latest_versions": {
-            "major": "2.17.0",
-            "minor": "2.17.0",
-            "patch": "2.14.3"
-          },
-          "update_available": {
-            "major": true,
-            "minor": true,
-            "patch": true
-          }
-        }
-      }
-    ]
-  }
-}
-```
-
-### List Available Versions Tool
-
-A tool that provides structured information about all available versions of a Maven dependency, grouped by minor version tracks.
-
-**Tool Name:** `mvn-mcp-server__list_available_versions_tool`
-
-**Parameters:**
-- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
-- `version`: Current version string to use as reference (e.g., "5.3.10")
-- `packaging`: (Optional) Package type (jar, war, pom, etc.), defaults to "jar"
-- `classifier`: (Optional) Classifier (e.g., "sources", "javadoc")
-- `include_all_versions`: (Optional) Whether to include all versions in the response, defaults to false
-
-**Usage Example:**
-
-```python
-# Through the Claude Code assistant:
-# Basic usage - Get latest versions per track
-mcp__mvn-mcp-server__list_available_versions_tool(
-    dependency="org.springframework:spring-core",
-    version="5.3.10"
-)
-
-# Include all versions in each track
-mcp__mvn-mcp-server__list_available_versions_tool(
-    dependency="org.springframework:spring-core",
-    version="5.3.10",
-    include_all_versions=True
-)
-
-# With optional parameters
-mcp__mvn-mcp-server__list_available_versions_tool(
-    dependency="org.springframework:spring-core",
-    version="5.3.10",
-    packaging="jar",
-    classifier="sources",
-    include_all_versions=True
-)
-```
-
-**Response Format:**
-```json
-{
-  "tool_name": "list_available_versions",
-  "status": "success",
-  "result": {
-    "current_version": "5.3.10",
-    "current_exists": true,
-    "latest_version": "6.2.6",
-    "minor_tracks": {
-      "6.2": {
-        "latest": "6.2.6",
-        "is_current_track": false
-      },
-      "6.1": {
-        "latest": "6.1.8",
-        "is_current_track": false
-      },
-      "6.0": {
-        "latest": "6.0.17",
-        "is_current_track": false
-      },
-      "5.3": {
-        "latest": "5.3.39",
-        "is_current_track": true,
-        "versions": ["5.3.0", "5.3.1", "5.3.2", "5.3.3", "5.3.4", "5.3.5", 
-                    "5.3.6", "5.3.7", "5.3.8", "5.3.9", "5.3.10", "5.3.11",
-                    "5.3.12", "5.3.13", "5.3.14", "5.3.15", "5.3.16", "5.3.17",
-                    "5.3.18", "5.3.19", "5.3.20", "5.3.21", "5.3.22", "5.3.23",
-                    "5.3.24", "5.3.25", "5.3.26", "5.3.27", "5.3.28", "5.3.29",
-                    "5.3.30", "5.3.31", "5.3.32", "5.3.33", "5.3.34", "5.3.35",
-                    "5.3.36", "5.3.37", "5.3.38", "5.3.39"]
-      },
-      "5.2": {
-        "latest": "5.2.25",
-        "is_current_track": false
-      },
-      "5.1": {
-        "latest": "5.1.21",
-        "is_current_track": false
-      },
-      "5.0": {
-        "latest": "5.0.20",
-        "is_current_track": false
-      }
-    }
-  }
-}
-```
-
-When `include_all_versions` is false (default), only the current track will include the full `versions` array. When true, all minor tracks will include their complete version lists.
+### Security Scanning  
+- **scan_java_project_tool**: Scan Java Maven projects for vulnerabilities using Trivy
+- **analyze_pom_file_tool**: Analyze a single Maven POM file for dependencies and vulnerabilities
 
 ## Error Handling
 
