@@ -11,6 +11,14 @@ Each entry includes not just what changed, but WHY it changed and what patterns 
 Key architectural decisions are linked to their ADRs.
 -->
 
+## [0.1.4](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.3...v0.1.4) (2025-05-29)
+
+
+### Bug Fixes
+
+* **copilot:** move setup file to workflows directory and update format ([e31ff8e](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/e31ff8e5e8700e6430362c5ab22eca7b677124c0))
+* **copilot:** move setup file to workflows directory and update format ([ea8da65](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/ea8da6515a27ef24970b7e24c8ee63564d1d9a58))
+
 ## [0.1.3](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.2...v0.1.3) (2025-05-24)
 
 
