@@ -11,6 +11,23 @@ Each entry includes not just what changed, but WHY it changed and what patterns 
 Key architectural decisions are linked to their ADRs.
 -->
 
+## [0.2.0](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.3...v0.2.0) (2025-06-06)
+
+
+### Features
+
+* **prompts:** add MCP Prompts specification for dependency workflows ([a1e8992](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/a1e899278d8733ca60451cae9c30aa7afaa43171))
+* **prompts:** add MCP Prompts specification for dependency workflows ([2de3ffa](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/2de3ffa7662c6befd5469aa78c2a80c2e9390d57))
+* **prompts:** implement MCP Prompts and Resources for enterprise workflows ([6c97056](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/6c970562e769af539a7d4049845b516fff9c7426))
+* **prompts:** implement MCP Prompts and Resources for enterprise workflows ([c86422a](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/c86422a021f3b95225de9cba21c0d30e776a4a45))
+
+
+### Bug Fixes
+
+* **copilot:** move setup file to workflows directory and update format ([e31ff8e](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/e31ff8e5e8700e6430362c5ab22eca7b677124c0))
+* **copilot:** move setup file to workflows directory and update format ([ea8da65](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/ea8da6515a27ef24970b7e24c8ee63564d1d9a58))
+* **tests:** add pytest-asyncio dependency and configuration for CI ([00cb48a](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/00cb48a7e33a59b6881d6db2fcf79fb6740fa82f))
+
 ## [0.1.3](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.2...v0.1.3) (2025-05-24)
 
 
