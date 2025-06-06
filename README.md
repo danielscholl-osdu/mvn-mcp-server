@@ -68,9 +68,10 @@ To use this MCP server in your projects, add the following to your `.mcp.json` f
   "mcpServers": {
     "mvn-mcp-server": {
       "type": "stdio",
-      "command": "uv",
+      "command": "uvx",
       "args": [
-        "run",
+        "--from",
+        "git+https://github.com/danielscholl-osdu/mvn-mcp-server@main",
         "mvn-mcp-server"
       ],
       "env": {}
