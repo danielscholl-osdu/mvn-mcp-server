@@ -6,18 +6,22 @@
 This document outlines the architecture of the Maven MCP Server, a Model Context Protocol server that provides AI assistants with comprehensive tools for Maven dependency management. The architecture is designed for high performance, reliability, and extensibility while maintaining simplicity in its implementation.
 
 ### 1.2. Architectural Philosophy
-**AI-First, Performance-Optimized**: Built specifically for natural language interaction with Maven Central while maintaining sub-second response times through intelligent caching and efficient API usage.
+**AI-First, Workflow-Optimized**: Built specifically for natural language interaction with Maven Central, providing both atomic tools and guided enterprise workflows while maintaining sub-second response times through intelligent caching and efficient API usage.
 
 - **Single-Call Completeness**: Each tool provides comprehensive information in one call
+- **Enterprise Workflows**: Guided prompts orchestrate multiple tools for complex dependency management
+- **Persistent State**: Resources maintain workflow state between prompt executions
 - **Intelligent Caching**: Minimize Maven Central API calls through strategic caching
 - **Structured Validation**: Pydantic-based validation for all inputs and outputs
 - **Consistent Error Handling**: Standardized error responses optimized for AI interpretation
+- **Full Traceability**: Complete audit trail from vulnerability discovery to remediation tasks
 
 ### 1.3. Scope
 This document covers:
 - Overall system architecture and component relationships
 - Service layer design and responsibilities
 - Tool implementation patterns and conventions
+- Prompt and resource architecture for enterprise workflows
 - Caching strategy and performance optimizations
 - Error handling and data validation approaches
 - Testing architecture and patterns
@@ -25,19 +29,24 @@ This document covers:
 ## 2. Architectural Principles
 
 ### 2.1. Core Principles
-- **MCP Protocol Compliance**: Built on FastMCP for standard MCP implementation
-- **Service-Oriented Design**: Clear separation between tools, services, and utilities
+- **MCP Protocol Compliance**: Built on FastMCP for standard MCP implementation with prompts and resources
+- **Service-Oriented Design**: Clear separation between tools, prompts, services, and utilities
+- **Enterprise Workflow Support**: Guided multi-step processes with persistent state management
 - **Type Safety**: Comprehensive use of Python type hints and Pydantic models
 - **Performance First**: Caching and batch operations to minimize external API calls
 - **AI-Optimized Responses**: Structured data formats designed for LLM consumption
+- **Workflow Traceability**: Complete audit trail from analysis through implementation
 
 ### 2.2. Design Patterns
 **Key Patterns Applied:**
-1. **Service Layer Pattern**: Business logic separated from tool interfaces
+1. **Service Layer Pattern**: Business logic separated from tool and prompt interfaces
 2. **Repository Pattern**: Maven API abstracted through service interfaces
 3. **Strategy Pattern**: Version parsing supports multiple format strategies
-4. **Decorator Pattern**: Tool registration through FastMCP decorators
+4. **Decorator Pattern**: Tool and prompt registration through FastMCP decorators
 5. **Factory Pattern**: Standardized response creation
+6. **Resource Pattern**: URI-based state management with persistent storage
+7. **Workflow Pattern**: Orchestrated multi-step processes with traceability
+8. **Command Pattern**: Structured task representation with execution guidance
 
 ### 2.3. Technology Stack
 - **Runtime**: Python 3.12+
@@ -65,8 +74,16 @@ This document covers:
 │  ┌─────────────────────────────────┐    │
 │  │     FastMCP Framework          │    │
 │  │   • Tool Registration          │    │
+│  │   • Prompt Registration        │    │
+│  │   • Resource Management        │    │
 │  │   • Protocol Handling          │    │
 │  │   • Parameter Validation       │    │
+│  └─────────────────────────────────┘    │
+│  ┌─────────────────────────────────┐    │
+│  │       Prompt Layer             │    │
+│  │   • list_mcp_assets            │    │
+│  │   • triage (enterprise)        │    │
+│  │   • plan (enterprise)          │    │
 │  └─────────────────────────────────┘    │
 │  ┌─────────────────────────────────┐    │
 │  │        Tool Layer              │    │
@@ -75,6 +92,14 @@ This document covers:
 │  │   • list_available_versions    │    │
 │  │   • scan_java_project          │    │
 │  │   • analyze_pom_file           │    │
+│  └─────────────────────────────────┘    │
+│  ┌─────────────────────────────────┐    │
+│  │      Resource Layer            │    │
+│  │   • TriageReportResource       │    │
+│  │   • UpdatePlanResource         │    │
+│  │   • ServerAssetsResource       │    │
+│  │   • URI Pattern Matching       │    │
+│  │   • State Persistence          │    │
 │  └─────────────────────────────────┘    │
 │  ┌─────────────────────────────────┐    │
 │  │       Service Layer            │    │
@@ -105,7 +130,17 @@ This document covers:
 ```
 mvn_mcp_server/
 ├── main.py                      # Application entry point
-├── server.py                    # FastMCP server setup & tool registration
+├── server.py                    # FastMCP server setup & tool/prompt/resource registration
+├── prompts/                     # MCP prompt implementations (enterprise workflows)
+│   ├── __init__.py
+│   ├── list_mcp_assets.py       # Dynamic capability overview
+│   ├── triage.py                # Comprehensive dependency analysis
+│   └── plan.py                  # Actionable update planning
+├── resources/                   # MCP resource implementations (state management)
+│   ├── __init__.py
+│   ├── triage_reports.py        # Vulnerability triage report storage
+│   ├── update_plans.py          # Remediation plan storage with progress tracking
+│   └── server_assets.py         # Dynamic server capability information
 ├── services/                    # Service layer implementations
 │   ├── __init__.py
 │   ├── cache.py                 # In-memory caching with TTL
@@ -116,7 +151,7 @@ mvn_mcp_server/
 │   ├── __init__.py
 │   ├── data_types.py            # Pydantic models & validators
 │   └── utils.py                 # Common utilities & error handling
-├── tools/                       # MCP tool implementations
+├── tools/                       # MCP tool implementations (atomic operations)
 │   ├── __init__.py
 │   ├── analyze_pom_file.py      # POM file analysis
 │   ├── check_version.py         # Single version checking
@@ -127,15 +162,178 @@ mvn_mcp_server/
 │   ├── semver.py                # Semantic version utilities
 │   └── utils.py                 # Tool-specific utilities
 └── tests/                       # Comprehensive test suite
-    ├── resources/               # Test POM files
+    ├── prompts/                 # Prompt implementation tests
+    ├── resources/               # Resource storage tests
+    ├── resources/test_data/     # Test POM files
     ├── services/                # Service layer tests
     ├── shared/                  # Shared component tests
     └── tools/                   # Tool implementation tests
 ```
 
-## 4. Service Layer Architecture
+## 4. Prompt Architecture (Enterprise Workflows)
 
-### 4.1. MavenApiService
+### 4.1. Design Philosophy
+
+Prompts provide guided workflows that orchestrate multiple tools to accomplish complex dependency management tasks. Unlike atomic tools, prompts follow enterprise patterns with structured phases, comprehensive documentation, and persistent state management.
+
+**Key Characteristics:**
+- **Multi-Step Workflows**: Orchestrated sequences of tool operations
+- **Enterprise Structure**: Phase-based organization with clear objectives
+- **State Persistence**: Integration with Resources for workflow continuity
+- **AI-Optimized**: Structured markdown output designed for LLM consumption
+- **Traceability**: Complete audit trail from analysis to implementation
+
+### 4.2. Prompt Implementation Pattern
+
+```python
+async def enterprise_prompt(service_name: str, **kwargs) -> List[Message]:
+    """Enterprise workflow prompt with structured guidance."""
+    
+    # Generate timestamp and workspace context
+    timestamp = datetime.now().isoformat()
+    workspace_path = kwargs.get('workspace', f"./{service_name}")
+    
+    # Structured workflow content
+    content = f"""# Enterprise Workflow: {prompt_name}
+    
+    **Service:** {service_name}
+    **Timestamp:** {timestamp}
+    **Workspace:** {workspace_path}
+    
+    ## Workflow Overview
+    [Phase-based workflow description]
+    
+    ### Phase 1: [Objective]
+    **Tasks:**
+    1. **Task Name**: Description with tool integration
+       - Use: `tool_name(parameters)`
+       - Expected: Result description
+    
+    ### Phase N: Resource Storage
+    **Objective:** Persist results for subsequent workflow steps
+    **Tasks:**
+    - Store complete analysis to: `resource://pattern/{service_name}/latest`
+    
+    ## Success Criteria
+    - [Measurable outcomes]
+    - [Quality standards]
+    - [Next workflow step guidance]
+    """
+    
+    return [{"role": "user", "content": content}]
+```
+
+### 4.3. Core Prompts
+
+#### list_mcp_assets
+- **Purpose**: Dynamic server capability overview
+- **Pattern**: Self-documenting with real-time capability detection
+- **Output**: Comprehensive markdown guide with examples
+
+#### triage (dependency analysis)
+- **Purpose**: Enterprise dependency and vulnerability analysis
+- **Pattern**: Discovery → Analysis → Security → Report → Storage
+- **Integration**: Uses `scan_java_project_tool`, `check_version_batch_tool`
+- **Output**: Structured triage report with CVE details and recommendations
+- **Storage**: `triage://reports/{service_name}/latest`
+
+#### plan (update planning)
+- **Purpose**: Actionable remediation planning from triage data
+- **Pattern**: Retrieve → Analyze → Structure → Plan → Store
+- **Traceability**: Every task links to specific triage findings
+- **Output**: Phase-based implementation plan with file locations
+- **Storage**: `plans://updates/{service_name}/latest`
+
+## 5. Resource Architecture (State Management)
+
+### 5.1. Design Philosophy
+
+Resources provide persistent state management with URI-based access patterns, enabling complex workflows that span multiple prompt executions while maintaining complete audit trails.
+
+**Key Characteristics:**
+- **URI-Based Access**: RESTful resource patterns (`protocol://type/identifier`)
+- **Type-Safe Storage**: Pydantic models ensure data integrity
+- **History Tracking**: Multiple versions preserved for audit trails
+- **Cross-Prompt Integration**: Seamless data flow between workflow steps
+
+### 5.2. Resource Implementation Pattern
+
+```python
+class EnterpriseResource:
+    """Enterprise resource with type-safe storage and history tracking."""
+    
+    def __init__(self):
+        self._current: Dict[str, DataModel] = {}
+        self._history: Dict[str, List[DataModel]] = {}
+    
+    async def get_data(self, identifier: str) -> Optional[Dict[str, Any]]:
+        """Retrieve current resource data as dictionary."""
+        resource = self._current.get(identifier)
+        return resource.model_dump() if resource else None
+    
+    async def save_data(self, identifier: str, raw_data: Dict[str, Any]) -> DataModel:
+        """Save validated resource data with history tracking."""
+        # Validate with Pydantic
+        validated_data = DataModel(**raw_data)
+        
+        # Store current version
+        self._current[identifier] = validated_data
+        
+        # Preserve history
+        if identifier not in self._history:
+            self._history[identifier] = []
+        self._history[identifier].append(validated_data)
+        
+        return validated_data
+```
+
+### 5.3. Resource URI Patterns
+
+#### Triage Reports: `triage://reports/{service_name}/latest`
+- **Data Model**: TriageReport with metadata, vulnerabilities, updates
+- **Structure**: Pydantic validation ensures complete analysis data
+- **Usage**: Plan generation, audit trails, progress tracking
+
+#### Update Plans: `plans://updates/{service_name}/latest`
+- **Data Model**: UpdatePlan with phases, tasks, progress tracking
+- **Structure**: Task-based organization with CVE traceability
+- **Usage**: Implementation guidance, progress monitoring
+
+#### Server Assets: `assets://server/capabilities`
+- **Data Model**: Dynamic capability information
+- **Structure**: Real-time tool/prompt/resource enumeration
+- **Usage**: Self-documentation, capability discovery
+
+### 5.4. Data Models (Pydantic)
+
+**Enterprise Validation:**
+```python
+class TriageMetadata(BaseModel):
+    report_id: str = Field(..., description="Unique report identifier")
+    service_name: str = Field(..., description="Service being analyzed")
+    timestamp: str = Field(..., description="ISO timestamp")
+    vulnerability_counts: Dict[str, int] = Field(..., description="Severity breakdown")
+
+class VulnerabilityFinding(BaseModel):
+    cve_id: str = Field(..., description="CVE identifier")
+    severity: str = Field(..., description="CRITICAL/HIGH/MEDIUM/LOW")
+    dependency: str = Field(..., description="Affected dependency")
+    current_version: str = Field(..., description="Vulnerable version")
+    fix_version: str = Field(..., description="Minimum fix version")
+    description: str = Field(..., description="Vulnerability description")
+
+class UpdateTask(BaseModel):
+    task_id: str = Field(..., description="Unique task identifier")
+    dependency: str = Field(..., description="Maven coordinates")
+    traceability_link: str = Field(..., description="Link to triage finding")
+    cve_ids: List[str] = Field(default_factory=list, description="Related CVEs")
+    file_location: str = Field(..., description="POM file to modify")
+    status: TaskStatus = Field(default=TaskStatus.PENDING)
+```
+
+## 6. Service Layer Architecture
+
+### 6.1. MavenApiService
 
 **Purpose**: Abstracts all interactions with Maven Central repository APIs
 
@@ -169,7 +367,7 @@ class MavenApiService:
 - Automatic retry logic with exponential backoff
 - Cache integration for all operations
 
-### 4.2. CacheService
+### 6.2. CacheService
 
 **Purpose**: In-memory caching with TTL support to minimize API calls
 
@@ -196,7 +394,7 @@ class CacheService:
 - Automatic cleanup of expired entries on access
 - Pattern-based invalidation for related entries
 
-### 4.3. VersionService
+### 6.3. VersionService
 
 **Purpose**: Sophisticated version parsing and comparison logic
 
@@ -227,7 +425,7 @@ class VersionService:
 - Qualifier handling (alpha, beta, RC, SNAPSHOT)
 - Intelligent version comparison logic
 
-### 4.4. ResponseService
+### 6.4. ResponseService
 
 **Purpose**: Standardized response formatting for all tools
 
@@ -253,9 +451,9 @@ def format_error_response(tool_name: str, error_code: str,
     }
 ```
 
-## 5. Tool Implementation Architecture
+## 7. Tool Implementation Architecture
 
-### 5.1. Tool Registration Pattern
+### 7.1. Tool Registration Pattern
 
 **Server Setup (server.py):**
 ```python
@@ -279,7 +477,7 @@ def check_version_tool(dependency: str, version: str,
     return result
 ```
 
-### 5.2. Tool Implementation Pattern
+### 7.2. Tool Implementation Pattern
 
 **Standard Tool Structure:**
 ```python
@@ -341,7 +539,7 @@ def tool_implementation(
         )
 ```
 
-### 5.3. Batch Processing Architecture
+### 7.3. Batch Processing Architecture
 
 **Batch Tool Pattern:**
 ```python
@@ -377,9 +575,9 @@ def process_batch(dependencies: List[DependencyCheck]) -> BatchResult:
     }
 ```
 
-## 6. Data Validation Architecture
+## 8. Data Validation Architecture
 
-### 6.1. Pydantic Models
+### 8.1. Pydantic Models
 
 **Request/Response Models:**
 ```python
@@ -402,7 +600,7 @@ class DependencyCheck(BaseModel):
         return v
 ```
 
-### 6.2. Validation Utilities
+### 8.2. Validation Utilities
 
 ```python
 def validate_maven_coordinate(coordinate: str) -> Tuple[str, str]:
@@ -417,9 +615,9 @@ def validate_maven_coordinate(coordinate: str) -> Tuple[str, str]:
         raise ValueError(f"Invalid Maven coordinate: {coordinate}")
 ```
 
-## 7. Error Handling Architecture
+## 9. Error Handling Architecture
 
-### 7.1. Error Code System
+### 9.1. Error Code System
 
 ```python
 class ErrorCode:
@@ -431,7 +629,7 @@ class ErrorCode:
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
 ```
 
-### 7.2. Exception Handling Strategy
+### 9.2. Exception Handling Strategy
 
 **Hierarchical Error Handling:**
 1. **Input Validation**: Caught at tool entry, returns INVALID_INPUT_FORMAT
@@ -451,9 +649,9 @@ class ErrorCode:
 }
 ```
 
-## 8. Performance Optimization
+## 10. Performance Optimization
 
-### 8.1. Caching Strategy
+### 10.1. Caching Strategy
 
 **Multi-Level Caching:**
 1. **Service Level**: Cache API responses (metadata, search results)
@@ -465,7 +663,7 @@ class ErrorCode:
 - Search: `"search:{group_id}:{artifact_id}:{version_pattern}"`
 - Version existence: `"exists:{group_id}:{artifact_id}:{version}:{packaging}:{classifier}"`
 
-### 8.2. API Call Optimization
+### 10.2. API Call Optimization
 
 **Strategies:**
 1. **HEAD Requests**: Use HEAD for existence checks (no body transfer)
@@ -473,7 +671,7 @@ class ErrorCode:
 3. **Selective Fetching**: Only fetch required data
 4. **Connection Reuse**: HTTP session management in httpx
 
-### 8.3. Response Optimization
+### 10.3. Response Optimization
 
 **AI-Optimized Responses:**
 1. **Complete Information**: Single call provides all relevant data
@@ -481,9 +679,9 @@ class ErrorCode:
 3. **Summary First**: High-level summary before details
 4. **Actionable Messages**: Clear next steps in error messages
 
-## 9. Testing Architecture
+## 11. Testing Architecture
 
-### 9.1. Testing Strategy
+### 11.1. Testing Strategy
 
 **Test Organization:**
 ```
@@ -494,7 +692,7 @@ tests/
 └── resources/         # Test data (POM files)
 ```
 
-### 9.2. Testing Patterns
+### 11.2. Testing Patterns
 
 **Service Mocking:**
 ```python
@@ -527,7 +725,7 @@ def test_invalid_coordinate_format():
     assert "groupId:artifactId" in result["error"]["message"]
 ```
 
-### 9.3. Test Data Management
+### 11.3. Test Data Management
 
 **Resource Files:**
 - `test-multi-module-pom.xml`: Complex multi-module project
@@ -535,9 +733,9 @@ def test_invalid_coordinate_format():
 - `test-azure-module-pom.xml`: Azure-specific dependencies
 - `test-core-module-pom.xml`: Simple module structure
 
-## 10. Security Scanning Architecture
+## 12. Security Scanning Architecture
 
-### 10.1. Trivy Integration
+### 12.1. Trivy Integration
 
 **Security Scanning Flow:**
 ```python
@@ -563,7 +761,7 @@ def scan_with_trivy(workspace_path: str, options: ScanOptions) -> Dict:
     return format_vulnerability_report(json.loads(result.stdout))
 ```
 
-### 10.2. POM File Analysis
+### 12.2. POM File Analysis
 
 **Standalone POM Analysis:**
 ```python
@@ -589,9 +787,9 @@ def analyze_pom_file(pom_path: str) -> Dict:
     return aggregate_pom_analysis(results)
 ```
 
-## 11. Deployment Considerations
+## 13. Deployment Considerations
 
-### 11.1. MCP Client Configuration
+### 13.1. MCP Client Configuration
 
 ```json
 {
@@ -609,7 +807,7 @@ def analyze_pom_file(pom_path: str) -> Dict:
 }
 ```
 
-### 11.2. Environment Configuration
+### 13.2. Environment Configuration
 
 **Supported Environment Variables:**
 - `LOG_LEVEL`: Logging verbosity (DEBUG, INFO, WARNING, ERROR)
@@ -617,7 +815,7 @@ def analyze_pom_file(pom_path: str) -> Dict:
 - `HTTP_TIMEOUT`: API request timeout
 - `MAX_RETRIES`: Maximum retry attempts for failed requests
 
-### 11.3. Performance Tuning
+### 13.3. Performance Tuning
 
 **Recommended Settings:**
 - Cache TTL: 3600s (1 hour) for stable data
@@ -625,9 +823,9 @@ def analyze_pom_file(pom_path: str) -> Dict:
 - Max Retries: 3 with exponential backoff
 - Connection Pool: Reuse connections within httpx
 
-## 12. Future Architecture Evolution
+## 14. Future Architecture Evolution
 
-### 12.1. Planned Enhancements
+### 14.1. Planned Enhancements
 
 **Repository Management:**
 - Support for private Maven repositories
@@ -641,7 +839,7 @@ def analyze_pom_file(pom_path: str) -> Dict:
 - Breaking change detection
 - Update impact analysis
 
-### 12.2. Extensibility Points
+### 14.2. Extensibility Points
 
 **Plugin Architecture:**
 1. **Custom Version Parsers**: Add support for proprietary versioning
@@ -649,7 +847,7 @@ def analyze_pom_file(pom_path: str) -> Dict:
 3. **Security Scanners**: Beyond Trivy integration
 4. **Notification Handlers**: Webhook support for updates
 
-## 13. Conclusion
+## 15. Conclusion
 
 The Maven MCP Server architecture demonstrates a well-structured, performant system designed specifically for AI-assisted dependency management. Key architectural achievements include:
 
@@ -668,7 +866,7 @@ The Maven MCP Server architecture demonstrates a well-structured, performant sys
 
 The architecture successfully bridges the gap between natural language AI assistants and the Maven ecosystem, providing reliable, fast, and comprehensive dependency management capabilities through the Model Context Protocol.
 
-## References
+## 16. References
 
 - [Project Brief](project-brief.md)
 - [Product Requirements Document](project-prd.md)

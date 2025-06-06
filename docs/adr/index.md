@@ -16,6 +16,7 @@ Optimized ADR Index for Agent Context
 | 008 | Mock-Based Testing Strategy         | acc    | [ADR-008](008-mock-based-testing-strategy.md) |
 | 009 | External Tool Integration Pattern   | acc    | [ADR-009](009-external-tool-integration-pattern.md) |
 | 010 | Dependency Management Strategy      | acc    | [ADR-010](010-dependency-management-strategy.md) |
+| 011 | MCP Prompts Implementation Strategy | acc    | [ADR-011](011-mcp-prompts-implementation.md) |
 
 ## ADR Records
 
@@ -207,4 +208,21 @@ implementation: |
 tradeoffs:
 positive: \[clear deps, modern HTTP client, no import errors]
 negative: \[two HTTP libraries, version pinning needed]
+```
+
+--------------------------------------------
+```yaml
+id: 011
+title: MCP Prompts Implementation Strategy
+status: accepted
+date: 2025-01-25
+decision: Implement MCP Prompts with Resources for enterprise dependency management workflows using simplified, memorable prompt names.
+why: |
+• Enable guided workflows for complex dependency management
+• Provide enterprise-grade structure and documentation
+• Maintain state between workflow steps with Resources
+• Simplify usage with memorable names (triage vs dependency_triage)
+tradeoffs:
+positive: \[complete workflows, enterprise ready, knowledge transfer, audit compliance, simple usage]
+negative: \[complexity, resource management, learning curve]
 ```

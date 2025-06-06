@@ -14,6 +14,16 @@ from mvn_mcp_server.tools.list_available_versions import list_available_versions
 from mvn_mcp_server.tools.java_security_scan import scan_java_project
 from mvn_mcp_server.tools.analyze_pom_file import analyze_pom_file
 
+# Import prompts
+from mvn_mcp_server.prompts.list_mcp_assets import list_mcp_assets
+from mvn_mcp_server.prompts.triage import dependency_triage
+from mvn_mcp_server.prompts.plan import update_plan
+
+# Import resources
+from mvn_mcp_server.resources.triage_reports import TriageReportResource
+from mvn_mcp_server.resources.update_plans import UpdatePlanResource
+from mvn_mcp_server.resources.server_assets import ServerAssetsResource
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -24,6 +34,60 @@ logger = logging.getLogger("mvn-mcp-server")
 mcp = FastMCP(
     "mvn MCP Server", description="A server providing tools for mvn OSDU assistant"
 )
+
+# Initialize resource instances
+triage_resource = TriageReportResource()
+plan_resource = UpdatePlanResource() 
+assets_resource = ServerAssetsResource()
+
+# Register prompts
+@mcp.prompt()
+async def list_mcp_assets_prompt():
+    """Return a comprehensive list of all MCP server capabilities."""
+    logger.info("MCP prompt: list_mcp_assets")
+    return await list_mcp_assets()
+
+
+@mcp.prompt()
+async def triage(service_name: str, workspace: Optional[str] = None):
+    """Analyze service dependencies and create vulnerability triage report."""
+    logger.info(f"MCP prompt: triage for service {service_name}")
+    return await dependency_triage(service_name, workspace)
+
+
+@mcp.prompt()
+async def plan(service_name: str, priorities: Optional[List[str]] = None):
+    """Create actionable update plan based on triage report."""
+    logger.info(f"MCP prompt: plan for service {service_name}")
+    return await update_plan(service_name, priorities)
+
+
+# Register resources
+@mcp.resource("triage://reports/{service_name}/latest")
+async def get_triage_report(service_name: str):
+    """Get the latest triage report for a service."""
+    logger.info(f"MCP resource: retrieving triage report for {service_name}")
+    report_data = await triage_resource.get_report_data(service_name)
+    if not report_data:
+        return {"error": f"No triage report found for {service_name}"}
+    return report_data
+
+
+@mcp.resource("plans://updates/{service_name}/latest") 
+async def get_update_plan(service_name: str):
+    """Get the current update plan for a service."""
+    logger.info(f"MCP resource: retrieving update plan for {service_name}")
+    plan_data = await plan_resource.get_plan_data(service_name)
+    if not plan_data:
+        return {"error": f"No update plan found for {service_name}"}
+    return plan_data
+
+
+@mcp.resource("assets://server/capabilities")
+async def get_server_capabilities():
+    """Get dynamic list of server capabilities."""
+    logger.info("MCP resource: retrieving server capabilities")
+    return assets_resource.get_capabilities()
 
 # Register new consolidated tools
 
