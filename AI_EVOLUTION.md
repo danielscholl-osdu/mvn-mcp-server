@@ -196,6 +196,108 @@ This composition pattern enables:
 - Easier testing
 - Natural extension points
 
+## Phase 6: MCP Prompts & Resources Implementation (2025-01-25)
+
+**The Enterprise Workflow Revolution**
+
+**Challenge**: Individual tools were powerful but users needed guided workflows for complex dependency management tasks spanning multiple tools and requiring state persistence.
+
+**Innovation**: MCP Prompts + Resources architecture
+- **Prompts**: Structured conversation starters for complex workflows
+- **Resources**: Persistent state management with URIs
+- **Enterprise Pattern**: triage → plan → implementation with full traceability
+
+### Key Architectural Insights
+
+**Workflow vs Tool Design**:
+```
+Tools: Individual operations (check version, scan, etc.)
+Prompts: Guided multi-step workflows (analyze → plan → implement)
+Resources: State bridge between prompt executions
+```
+
+**The Simplification Decision** (ADR-011):
+- **Before**: `dependency_triage` and `update_plan` 
+- **After**: `triage` and `plan`
+- **Why**: Memorable names reduce cognitive load, context is clear
+
+**Resource URI Patterns**:
+- `triage://reports/{service}/latest` - Analysis results
+- `plans://updates/{service}/latest` - Remediation plans  
+- `assets://server/capabilities` - Dynamic server info
+
+### Enterprise Workflow Pattern
+
+**The Complete Dependency Management Lifecycle**:
+```bash
+# 1. Comprehensive Analysis
+triage("user-service")
+→ Stores: vulnerability analysis, dependency updates, POM structure
+
+# 2. Actionable Planning  
+plan("user-service", ["CRITICAL"])
+→ Stores: phase-based tasks with CVE traceability
+
+# 3. Implementation Guidance
+→ Each task links to specific tools and file locations
+```
+
+**Traceability Achievement**:
+Every plan task traces back to specific triage findings:
+- CVE-2024-1234 → Update log4j-core → parent-pom.xml:42
+- Stale dependency → Update spring-core → Compatibility analysis
+
+### Technical Implementation Wins
+
+**Pydantic-Powered Resources**:
+- Type-safe data structures
+- Automatic validation
+- History tracking
+- Progress monitoring
+
+**Comprehensive Testing**:
+- 59 tests covering prompts and resources
+- Integration testing for complete workflows
+- Mock-based isolation for reliable testing
+
+**AI-Optimized Design**:
+- Structured markdown responses
+- Phase-based organization
+- Clear success criteria
+- Tool integration instructions
+
+### Lessons for Enterprise AI Tools
+
+1. **Workflow > Tools**: Complex tasks need guided workflows, not just atomic operations
+2. **State Persistence**: AI workflows benefit from persistent state between interactions
+3. **Traceability is King**: Enterprise users need complete audit trails
+4. **Simplicity Wins**: `triage` is better than `dependency_triage`
+5. **Structure Enables Scale**: Consistent patterns across all prompts
+
+### Performance & Usability Impact
+
+**Before Prompts**:
+- Users needed to orchestrate multiple tool calls
+- No persistence between sessions
+- Manual correlation of findings
+- Inconsistent documentation formats
+
+**After Prompts**:
+- Single command: `triage("service")` → complete analysis
+- Automatic state management
+- Built-in traceability from CVE to fix
+- Enterprise-grade documentation
+
+### The Composition Revolution
+
+The prompts don't replace tools—they orchestrate them:
+- `triage` uses `scan_java_project_tool`, `check_version_batch_tool`
+- `plan` references specific tools for validation
+- Resources enable seamless data flow
+- Everything builds on the existing service layer
+
+This creates a **tool ecosystem** where simple operations compose into sophisticated workflows while maintaining the precision of individual tools.
+
 ---
 
 ## How to Update This Document

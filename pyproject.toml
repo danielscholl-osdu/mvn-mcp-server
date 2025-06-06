@@ -32,13 +32,15 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 package-dir = {"" = "src"}
 
-[tool.pytest]
+[tool.pytest.ini_options]
 testpaths = ["src/mvn_mcp_server/tests"]
+asyncio_mode = "auto"
 
 [project.optional-dependencies]
 dev = [
     "pytest",
     "pytest-cov",
+    "pytest-asyncio",
     "flake8",
     "mypy",
     "black"

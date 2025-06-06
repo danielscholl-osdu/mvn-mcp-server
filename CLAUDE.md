@@ -8,10 +8,30 @@ Maven MCP Server provides Model Context Protocol access to Maven Central reposit
 
 ## Build/Test Commands
 - Install dependencies: `uv sync`
-- Install in dev mode: `uv pip install -e .`
+- Install in dev mode: `uv pip install -e ".[dev]"`
 - Run all tests: `uv run pytest`
 - Run specific test: `uv run pytest src/mvn_mcp_server/tests/tools/test_check_version.py`
 - Run specific test function: `uv run pytest src/mvn_mcp_server/tests/tools/test_check_version.py::TestCheckVersion::test_success`
+
+## Testing Guidelines & Troubleshooting
+
+### Async Test Requirements
+- **IMPORTANT**: Async tests require `pytest-asyncio` plugin (included in dev dependencies)
+- Verify async plugin is installed: `uv run pytest --version` should show `asyncio-X.X.X`
+- If async tests fail with "async def functions are not natively supported", ensure dev dependencies are installed: `uv pip install -e ".[dev]"`
+
+### CI Environment Simulation
+```bash
+# Test with exact CI environment setup
+uv sync --frozen                    # Use locked dependencies
+uv pip install -e ".[dev]"         # Install with all dev dependencies
+uv run pytest --cov=src/mvn_mcp_server --cov-report=xml --cov-report=term-missing --cov-fail-under=70 -v
+```
+
+### Common CI Failures
+1. **Async test failures**: Missing pytest-asyncio → Add to dev dependencies and update uv.lock
+2. **Coverage below 70%**: Run coverage locally with exact CI command above
+3. **Import errors**: Ensure all new dependencies are in pyproject.toml and uv.lock is updated
 
 ## Code Style
 - Use Python type hints for function parameters and return values
@@ -86,7 +106,7 @@ uv run black src/               # Format code
 
 # Development workflow
 uv sync                         # Sync dependencies
-uv pip install -e .             # Install package in editable mode
+uv pip install -e ".[dev]"      # Install package with dev dependencies (includes pytest-asyncio)
 ```
 
 ## Key Architecture Patterns

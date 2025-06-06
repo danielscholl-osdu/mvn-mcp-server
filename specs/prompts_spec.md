@@ -19,7 +19,7 @@ This specification implements a proven enterprise workflow for dependency manage
 ## Required Implementation Tasks
 
 - [ ] Implement prompt registration system using FastMCP's `@mcp.prompt()` decorator
-- [ ] Create 3 core prompts: list_mcp_assets, dependency_triage, and update_plan
+- [ ] Create 3 core prompts: list_mcp_assets, triage, and plan
 - [ ] Implement MCP Resources for storing triage reports and plans
 - [ ] Add prompt argument validation and processing
 - [ ] Build dynamic content generation based on available tools
@@ -59,7 +59,7 @@ This specification implements a proven enterprise workflow for dependency manage
    - Provides usage examples and quick start guide
    - Dynamic generation based on registered components
 
-2. **dependency_triage** (service_name: str, workspace: Optional[str] = None)
+2. **triage** (service_name: str, workspace: Optional[str] = None)
    - Comprehensive dependency analysis and vulnerability assessment
    - Locates and analyzes POM files in the project
    - Identifies outdated dependencies using batch version checking
@@ -68,7 +68,7 @@ This specification implements a proven enterprise workflow for dependency manage
    - Stores report in Resources for later access
    - Follows enterprise-grade analysis workflow
 
-3. **update_plan** (service_name: str, priorities: Optional[List[str]] = None)
+3. **plan** (service_name: str, priorities: Optional[List[str]] = None)
    - Creates actionable update plan based on triage report
    - Retrieves triage data from Resources
    - Groups updates by risk and priority
@@ -102,8 +102,8 @@ src/mvn_mcp_server/
 ├── prompts/
 │   ├── __init__.py
 │   ├── list_mcp_assets.py
-│   ├── dependency_triage.py
-│   └── update_plan.py
+│   ├── triage.py
+│   └── plan.py
 ├── resources/
 │   ├── __init__.py
 │   ├── triage_reports.py
@@ -113,8 +113,8 @@ src/mvn_mcp_server/
 │   ├── prompts/
 │   │   ├── __init__.py
 │   │   ├── test_list_mcp_assets.py
-│   │   ├── test_dependency_triage.py
-│   │   └── test_update_plan.py
+│   │   ├── test_triage.py
+│   │   └── test_plan.py
 │   └── resources/
 │       ├── __init__.py
 │       └── test_resources.py
@@ -180,7 +180,7 @@ Dynamic data and persistent state:
 ### Dependency Triage Implementation
 
 ```python
-# src/mvn_mcp_server/prompts/dependency_triage.py
+# src/mvn_mcp_server/prompts/triage.py
 from typing import List, Optional
 from mcp.types import Message
 import json
@@ -391,7 +391,7 @@ parent-pom.xml (defines versions)
 ### Update Plan Implementation
 
 ```python
-# src/mvn_mcp_server/prompts/update_plan.py
+# src/mvn_mcp_server/prompts/plan.py
 from typing import List, Optional
 from mcp.types import Message
 
@@ -857,8 +857,8 @@ Update `server.py` to register prompts and resources:
 ```python
 # Import prompt functions
 from mvn_mcp_server.prompts.list_mcp_assets import list_mcp_assets
-from mvn_mcp_server.prompts.dependency_triage import dependency_triage
-from mvn_mcp_server.prompts.update_plan import update_plan
+from mvn_mcp_server.prompts.triage import dependency_triage
+from mvn_mcp_server.prompts.plan import update_plan
 
 # Import resource handlers
 from mvn_mcp_server.resources.triage_reports import TriageReportResource
@@ -875,12 +875,12 @@ async def list_mcp_assets_prompt() -> List[Message]:
     return await list_mcp_assets()
 
 @mcp.prompt()
-async def dependency_triage_prompt(service_name: str, workspace: Optional[str] = None) -> List[Message]:
+async def triage(service_name: str, workspace: Optional[str] = None) -> List[Message]:
     """Analyze service dependencies and create vulnerability triage report."""
     return await dependency_triage(service_name, workspace)
 
 @mcp.prompt()
-async def update_plan_prompt(service_name: str, priorities: Optional[List[str]] = None) -> List[Message]:
+async def plan(service_name: str, priorities: Optional[List[str]] = None) -> List[Message]:
     """Create actionable update plan based on triage report."""
     return await update_plan(service_name, priorities)
 
@@ -911,9 +911,9 @@ Update README.md to include Prompts and Resources:
 
 ### Interactive Workflows
 - **list_mcp_assets**: Comprehensive overview of server capabilities
-- **dependency_triage**: Analyze dependencies and create vulnerability report
+- **triage**: Analyze dependencies and create vulnerability report
   - Arguments: `service_name` (required), `workspace` (optional)
-- **update_plan**: Create actionable update plan from triage results
+- **plan**: Create actionable update plan from triage results
   - Arguments: `service_name` (required), `priorities` (optional list)
 
 ### Using Prompts
@@ -922,10 +922,10 @@ Prompts provide guided workflows for complex dependency management tasks:
 
 ```bash
 # Start a dependency triage
-Use prompt: dependency_triage with service_name="my-service", workspace="./my-service"
+Use prompt: triage with service_name="my-service", workspace="./my-service"
 
 # Create an update plan focusing on critical issues
-Use prompt: update_plan with service_name="my-service", priorities=["CRITICAL", "HIGH"]
+Use prompt: plan with service_name="my-service", priorities=["CRITICAL", "HIGH"]
 
 # View all server capabilities
 Use prompt: list_mcp_assets
@@ -941,9 +941,9 @@ Resources provide persistent state between prompt executions:
 
 ### Workflow Example
 
-1. Run dependency triage: `dependency_triage("my-service")`
+1. Run dependency triage: `triage("my-service")`
 2. View report: Access `triage://reports/my-service/latest`
-3. Create plan: `update_plan("my-service", ["CRITICAL"])`
+3. Create plan: `plan("my-service", ["CRITICAL"])`
 4. View plan: Access `plans://updates/my-service/latest`
 ```
 

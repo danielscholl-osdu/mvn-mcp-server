@@ -156,6 +156,71 @@ Analyzes a single POM file for dependencies and vulnerabilities.
 - **scan_java_project_tool**: Scan Java Maven projects for vulnerabilities using Trivy
 - **analyze_pom_file_tool**: Analyze a single Maven POM file for dependencies and vulnerabilities
 
+## Available Prompts
+
+Interactive conversation starters and guided workflows for complex dependency management tasks:
+
+### Enterprise Workflow Prompts
+- **list_mcp_assets**: Comprehensive overview of all server capabilities
+  - Arguments: None
+  - Usage: Dynamic listing of prompts, tools, and resources with examples
+- **triage**: Analyze dependencies and create vulnerability triage report
+  - Arguments: `service_name` (required), `workspace` (optional)
+  - Usage: Comprehensive analysis following enterprise workflow: Discovery → Analysis → Security → Report
+- **plan**: Create actionable update plan from triage results
+  - Arguments: `service_name` (required), `priorities` (optional list)
+  - Usage: Creates structured remediation plan with phases, tasks, and full traceability
+
+### Using Prompts
+
+Prompts provide guided workflows for complex dependency management tasks:
+
+```bash
+# Start a dependency triage
+Use prompt: triage with service_name="my-service", workspace="./my-service"
+
+# Create an update plan focusing on critical issues
+Use prompt: plan with service_name="my-service", priorities=["CRITICAL", "HIGH"]
+
+# View all server capabilities
+Use prompt: list_mcp_assets
+```
+
+## Available Resources
+
+Resources provide persistent state between prompt executions:
+
+- **triage://reports/{service_name}/latest** - Latest triage report for a service
+- **plans://updates/{service_name}/latest** - Current update plan for a service  
+- **assets://server/capabilities** - Dynamic list of server capabilities
+
+### Workflow Example
+
+1. **Analyze Dependencies**
+   ```
+   Use prompt: triage("my-service")
+   Result: Comprehensive analysis stored in triage://reports/my-service/latest
+   ```
+
+2. **Review Triage Report**
+   ```
+   Access resource: triage://reports/my-service/latest
+   Contains: Vulnerabilities, outdated dependencies, POM analysis, recommendations
+   ```
+
+3. **Create Update Plan**
+   ```
+   Use prompt: plan("my-service", ["CRITICAL"])
+   Result: Actionable plan stored in plans://updates/my-service/latest
+   ```
+
+4. **Implement Updates**
+   ```
+   Use individual tools to execute specific updates following the plan:
+   - check_version_tool for validation
+   - scan_java_project_tool for verification
+   ```
+
 ## Error Handling
 
 All tools return standardized error responses when issues occur:
