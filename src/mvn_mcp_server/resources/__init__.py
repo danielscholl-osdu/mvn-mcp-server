@@ -12,10 +12,10 @@ from .server_assets import ServerAssetsResource
 
 __all__ = [
     "TriageReportResource",
-    "TriageReport", 
+    "TriageReport",
     "TriageMetadata",
     "UpdatePlanResource",
     "UpdatePlan",
     "PlanMetadata",
-    "ServerAssetsResource"
+    "ServerAssetsResource",
 ]

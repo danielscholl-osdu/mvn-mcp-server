@@ -13,7 +13,7 @@ Message = Dict[str, Any]
 
 async def list_mcp_assets() -> List[Message]:
     """Return a comprehensive list of all MCP server capabilities."""
-    
+
     content = """# 🚀 Maven MCP Server Assets
 
 ## 📝 Prompts
@@ -170,5 +170,5 @@ Use tool: scan_java_project_tool to confirm vulnerabilities resolved
 ---
 
 **🚀 Ready to get started? Begin with `triage` to analyze your service dependencies!**"""
-    
+
     return [{"role": "user", "content": content}]

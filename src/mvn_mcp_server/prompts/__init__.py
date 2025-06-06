@@ -10,8 +10,4 @@ from .list_mcp_assets import list_mcp_assets
 from .triage import dependency_triage
 from .plan import update_plan
 
-__all__ = [
-    "list_mcp_assets",
-    "dependency_triage", 
-    "update_plan"
-]
+__all__ = ["list_mcp_assets", "dependency_triage", "update_plan"]

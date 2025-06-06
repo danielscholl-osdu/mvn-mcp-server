@@ -12,16 +12,18 @@ from datetime import datetime
 Message = Dict[str, Any]
 
 
-async def dependency_triage(service_name: str, workspace: Optional[str] = None) -> List[Message]:
+async def dependency_triage(
+    service_name: str, workspace: Optional[str] = None
+) -> List[Message]:
     """Analyze service dependencies and create comprehensive vulnerability triage report."""
-    
+
     workspace_path = workspace or f"./{service_name}"
     timestamp = datetime.now().isoformat()
-    
+
     content = f"""# Maven Dependency Triage Analysis 🔍
 
-**Service:** {service_name}  
-**Workspace:** {workspace_path}  
+**Service:** {service_name}
+**Workspace:** {workspace_path}
 **Analysis Date:** {timestamp}
 
 You are performing a comprehensive dependency triage analysis following enterprise workflow best practices. This analysis will become the foundation for the subsequent update planning phase.
@@ -115,7 +117,7 @@ You are performing a comprehensive dependency triage analysis following enterpri
 
 ### Dependencies Analysis Summary
 - **Up to Date:** [count] dependencies
-- **Minor Updates:** [count] dependencies  
+- **Minor Updates:** [count] dependencies
 - **Major Updates:** [count] dependencies
 - **Security Updates:** [count] dependencies
 
@@ -229,5 +231,5 @@ parent-pom.xml (defines versions)
 - All findings must be categorized by priority and risk level
 
 **Begin comprehensive triage analysis now. The quality of this analysis directly impacts the effectiveness of the subsequent update planning phase.**"""
-    
+
     return [{"role": "user", "content": content}]

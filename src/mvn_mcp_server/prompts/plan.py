@@ -11,11 +11,13 @@ from typing import List, Optional, Dict, Any
 Message = Dict[str, Any]
 
 
-async def update_plan(service_name: str, priorities: Optional[List[str]] = None) -> List[Message]:
+async def update_plan(
+    service_name: str, priorities: Optional[List[str]] = None
+) -> List[Message]:
     """Create detailed remediation plan based on vulnerability triage report following enterprise workflow patterns."""
-    
+
     priority_filter = priorities or ["CRITICAL", "HIGH"]
-    
+
     content = f"""# Maven Remediation Plan Creation 📋
 
 You are creating a detailed remediation plan for **{service_name}** based on the vulnerability triage report, following enterprise workflow best practices.
@@ -27,7 +29,7 @@ Access the triage report from: `triage://reports/{service_name}/latest`
 
 Before drafting the final plan, work inside <triage_breakdown> tags to:
 - Extract and list all vulnerabilities mentioned in the triage report
-- Categorize vulnerabilities by severity (CRITICAL, HIGH, MEDIUM, LOW)  
+- Categorize vulnerabilities by severity (CRITICAL, HIGH, MEDIUM, LOW)
 - List all outdated dependencies and their current/target versions
 - Note specific POM files that need updating
 - Brainstorm Maven-specific considerations
@@ -42,22 +44,22 @@ Generate a plan following this proven enterprise structure:
 Brief description tying this plan to the triage report findings and total issues identified.
 
 ## References
-- Triage Report: {service_name}_triage_YYYY-MM-DD.md  
+- Triage Report: {service_name}_triage_YYYY-MM-DD.md
 - Maven Central documentation
 - Relevant CVEs: [list specific CVEs from triage]
 
 ## Phases and Tasks
 
 ### Phase 1: Update Critical Dependencies
-- [ ] **Update [dependency] from [current] to [target]**  
-  _Ref: [CVE-ID] ([description]), Triage Table_  
+- [ ] **Update [dependency] from [current] to [target]**
+  _Ref: [CVE-ID] ([description]), Triage Table_
   - Edit [specific-pom.xml file]
   - Property: `<[dependency].version>[target]</[dependency].version>`
   - Verify with: `check_version_tool("[groupId]:[artifactId]", "[target]")`
 
-### Phase 2: Update High Priority Dependencies  
-- [ ] **Update [dependency] from [current] to [target]**  
-  _Ref: [CVE-ID] ([description]), Triage Table_  
+### Phase 2: Update High Priority Dependencies
+- [ ] **Update [dependency] from [current] to [target]**
+  _Ref: [CVE-ID] ([description]), Triage Table_
   - [Specific implementation steps]
 
 ### Phase 3: Update Medium/Low Priority Dependencies
@@ -89,9 +91,9 @@ Brief description tying this plan to the triage report findings and total issues
 
 ## Version Control Conventions
 - **Branch naming:** `remediate/{service_name}-vuln-YYYY-MM`
-- **Commit message format:**  
+- **Commit message format:**
   `fix({service_name}): update [dependency] to [version] for [CVE-ID]`
-- **Required PR checks:**  
+- **Required PR checks:**
   - Build passes (`mvn clean install`)
   - All tests pass (`mvn verify`)
   - Security scan passes (zero CRITICAL/HIGH)
@@ -99,7 +101,7 @@ Brief description tying this plan to the triage report findings and total issues
 
 ## Progress Checklist
 - [ ] Phase 1: Critical updates complete
-- [ ] Phase 2: High priority updates complete  
+- [ ] Phase 2: High priority updates complete
 - [ ] Phase 3: Medium/low updates complete
 - [ ] Phase 4: Security hardening complete
 - [ ] Phase 5: Build & test verification complete
@@ -179,5 +181,5 @@ After creating the remediation plan:
 **Important:** The plan must demonstrate clear traceability from each task back to specific triage findings. Every dependency update should reference the CVE ID, vulnerability description, or staleness analysis that drives the need for the update.
 
 Begin creating the remediation plan now, ensuring it follows the proven enterprise structure with full traceability to triage findings."""
-    
+
     return [{"role": "user", "content": content}]

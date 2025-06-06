@@ -37,8 +37,9 @@ mcp = FastMCP(
 
 # Initialize resource instances
 triage_resource = TriageReportResource()
-plan_resource = UpdatePlanResource() 
+plan_resource = UpdatePlanResource()
 assets_resource = ServerAssetsResource()
+
 
 # Register prompts
 @mcp.prompt()
@@ -73,7 +74,7 @@ async def get_triage_report(service_name: str):
     return report_data
 
 
-@mcp.resource("plans://updates/{service_name}/latest") 
+@mcp.resource("plans://updates/{service_name}/latest")
 async def get_update_plan(service_name: str):
     """Get the current update plan for a service."""
     logger.info(f"MCP resource: retrieving update plan for {service_name}")
@@ -88,6 +89,7 @@ async def get_server_capabilities():
     """Get dynamic list of server capabilities."""
     logger.info("MCP resource: retrieving server capabilities")
     return assets_resource.get_capabilities()
+
 
 # Register new consolidated tools
 
