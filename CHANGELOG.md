@@ -11,6 +11,21 @@ Each entry includes not just what changed, but WHY it changed and what patterns 
 Key architectural decisions are linked to their ADRs.
 -->
 
+## [0.3.0](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.2.0...v0.3.0) (2025-06-12)
+
+
+### Features
+
+* **ci:** enhance workflow with timeout protection and artifact collection ([ff80b29](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/ff80b291b82e5394b03e118dea2612dd47874703))
+* **tests:** add comprehensive MCP server integration tests ([8a5b914](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/8a5b914bb8dd925a1663d762230c5fa0f71f6c37))
+
+
+### Bug Fixes
+
+* **deps:** upgrade FastMCP from &gt;=2.0.0 to &gt;=2.8.0 ([4d11519](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/4d115195efedad2dd569885743a35bd2a7a0d974))
+* **server:** update FastMCP constructor to use instructions parameter ([46fad3f](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/46fad3f7435b278706f03c2cb0ebf4bdcc74ef53))
+* **tests:** improve FastMCP 2.8.0 API compatibility for integration tests ([87d94a5](https://github.com/danielscholl-osdu/mvn-mcp-server/commit/87d94a5578c80d03dbb465a170594116e77c770b))
+
 ## [0.2.0](https://github.com/danielscholl-osdu/mvn-mcp-server/compare/v0.1.3...v0.2.0) (2025-06-06)
 
 
