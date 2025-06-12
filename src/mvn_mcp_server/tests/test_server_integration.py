@@ -97,12 +97,18 @@ class TestMCPServerIntegration:
         async with client:
             result = await client.get_prompt("list_mcp_assets_prompt", {})
 
-            # Result should be a list of messages
-            assert isinstance(result, list)
-            assert len(result) > 0
+            # Handle both list and GetPromptResult formats
+            if isinstance(result, list):
+                messages = result
+            else:
+                # GetPromptResult object
+                assert hasattr(result, "messages")
+                messages = result.messages
+
+            assert len(messages) > 0
 
             # First message should contain our assets information
-            message = result[0]
+            message = messages[0]
             assert hasattr(message, "content")
             assert isinstance(message.content, TextContent)
             assert "Maven MCP Server Assets" in message.content.text
@@ -115,11 +121,17 @@ class TestMCPServerIntegration:
         async with client:
             result = await client.get_prompt("triage", {"service_name": "test-service"})
 
-            # Should return structured prompt
-            assert isinstance(result, list)
-            assert len(result) > 0
+            # Handle both list and GetPromptResult formats
+            if isinstance(result, list):
+                messages = result
+            else:
+                # GetPromptResult object
+                assert hasattr(result, "messages")
+                messages = result.messages
 
-            message = result[0]
+            assert len(messages) > 0
+
+            message = messages[0]
             assert hasattr(message, "content")
             assert isinstance(message.content, TextContent)
             assert "test-service" in message.content.text
@@ -136,11 +148,17 @@ class TestMCPServerIntegration:
                 },
             )
 
-            # Should return structured prompt
-            assert isinstance(result, list)
-            assert len(result) > 0
+            # Handle both list and GetPromptResult formats
+            if isinstance(result, list):
+                messages = result
+            else:
+                # GetPromptResult object
+                assert hasattr(result, "messages")
+                messages = result.messages
 
-            message = result[0]
+            assert len(messages) > 0
+
+            message = messages[0]
             assert hasattr(message, "content")
             assert isinstance(message.content, TextContent)
             assert "test-service" in message.content.text
@@ -175,11 +193,11 @@ class TestMCPServerIntegration:
 
     async def test_tool_error_handling(self, client):
         """Test that tools handle invalid input gracefully."""
-        from fastmcp.exceptions import ClientError
+        from fastmcp.exceptions import ClientError, ToolError
 
         async with client:
-            # Should raise ClientError for invalid input
-            with pytest.raises(ClientError) as exc_info:
+            # Should raise either ClientError or ToolError for invalid input
+            with pytest.raises((ClientError, ToolError)) as exc_info:
                 await client.call_tool(
                     "check_version_tool",
                     {
