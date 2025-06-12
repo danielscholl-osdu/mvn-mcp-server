@@ -30,9 +30,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger("mvn-mcp-server")
 
-# Create FastMCP server instance with descriptions
+# Create FastMCP server instance
 mcp = FastMCP(
-    "mvn MCP Server", description="A server providing tools for mvn OSDU assistant"
+    name="mvn MCP Server",
+    instructions="""
+        This server provides comprehensive Maven dependency management tools.
+        Use check_version_tool() for single dependency analysis.
+        Use check_version_batch_tool() for multiple dependencies.
+        Use scan_java_project_tool() for security vulnerability scanning.
+        Use triage and plan prompts for enterprise workflows.
+    """
 )
 
 # Initialize resource instances
