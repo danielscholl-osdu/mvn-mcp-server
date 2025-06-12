@@ -69,6 +69,7 @@ jobs:
     - name: Run tests with coverage
       id: pytest
       continue-on-error: true
+      timeout-minutes: 10  # Prevent hanging tests
       run: |
         echo "::group::PyTest with Coverage"
         uv run pytest \
@@ -76,8 +77,21 @@ jobs:
           --cov-report=xml \
           --cov-report=term-missing \
           --cov-fail-under=70 \
-          -v
+          -v \
+          --tb=short  # More concise error output for CI
         echo "::endgroup::"
+        
+    # Save test artifacts on failure
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      if: failure() && steps.pytest.outcome == 'failure'
+      with:
+        name: test-artifacts-py${{ matrix.python-version }}
+        path: |
+          coverage.xml
+          .coverage
+          **/*.log
+        retention-days: 7
         
     # Generate quality check summary
     - name: Quality Check Summary
