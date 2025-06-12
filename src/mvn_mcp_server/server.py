@@ -39,7 +39,7 @@ mcp = FastMCP(
         Use check_version_batch_tool() for multiple dependencies.
         Use scan_java_project_tool() for security vulnerability scanning.
         Use triage and plan prompts for enterprise workflows.
-    """
+    """,
 )
 
 # Initialize resource instances

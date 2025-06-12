@@ -6,7 +6,7 @@ ensuring proper registration and behavior of tools, prompts, and resources.
 
 import pytest
 from fastmcp import Client
-from mcp.types import TextContent, ImageContent, EmbeddedResource
+from mcp.types import TextContent
 from mvn_mcp_server.server import mcp
 
 
@@ -22,7 +22,7 @@ class TestMCPServerIntegration:
         """Test that the server responds to ping."""
         async with client:
             # Ping may return None in some FastMCP versions, just test it doesn't error
-            result = await client.ping()
+            await client.ping()
             # If we get here without exception, server is responsive
             assert True
 
@@ -30,42 +30,42 @@ class TestMCPServerIntegration:
         """Test that all expected tools are registered."""
         async with client:
             tools = await client.list_tools()
-            
+
             tool_names = [tool.name for tool in tools]
             expected_tools = [
                 "check_version_tool",
-                "check_version_batch_tool", 
+                "check_version_batch_tool",
                 "list_available_versions_tool",
                 "scan_java_project_tool",
-                "analyze_pom_file_tool"
+                "analyze_pom_file_tool",
             ]
-            
+
             for expected_tool in expected_tools:
-                assert expected_tool in tool_names, f"Tool {expected_tool} not found in {tool_names}"
+                assert (
+                    expected_tool in tool_names
+                ), f"Tool {expected_tool} not found in {tool_names}"
 
     async def test_list_prompts(self, client):
         """Test that all expected prompts are registered."""
         async with client:
             prompts = await client.list_prompts()
-            
+
             prompt_names = [prompt.name for prompt in prompts]
-            expected_prompts = [
-                "list_mcp_assets_prompt",
-                "triage", 
-                "plan"
-            ]
-            
+            expected_prompts = ["list_mcp_assets_prompt", "triage", "plan"]
+
             for expected_prompt in expected_prompts:
-                assert expected_prompt in prompt_names, f"Prompt {expected_prompt} not found in {prompt_names}"
+                assert (
+                    expected_prompt in prompt_names
+                ), f"Prompt {expected_prompt} not found in {prompt_names}"
 
     async def test_list_resources(self, client):
         """Test that all expected resources are registered."""
         async with client:
             resources = await client.list_resources()
-            
+
             # Should have at least the static assets resource
             assert len(resources) >= 1
-            
+
             # Check for the assets resource which is always available
             resource_uris = [str(resource.uri) for resource in resources]
             assert "assets://server/capabilities" in resource_uris
@@ -75,20 +75,18 @@ class TestMCPServerIntegration:
         async with client:
             result = await client.call_tool(
                 "check_version_tool",
-                {
-                    "dependency": "org.springframework:spring-core",
-                    "version": "5.3.0"
-                }
+                {"dependency": "org.springframework:spring-core", "version": "5.3.0"},
             )
-            
+
             # Should return content
             assert len(result) > 0
             assert isinstance(result[0], TextContent)
-            
+
             # Parse the JSON response
             import json
+
             response_data = json.loads(result[0].text)
-            
+
             # Check response structure
             assert "tool_name" in response_data
             assert "status" in response_data
@@ -97,18 +95,15 @@ class TestMCPServerIntegration:
     async def test_list_mcp_assets_prompt(self, client):
         """Test calling the list_mcp_assets prompt."""
         async with client:
-            result = await client.get_prompt(
-                "list_mcp_assets_prompt",
-                {}
-            )
-            
+            result = await client.get_prompt("list_mcp_assets_prompt", {})
+
             # Result should be a list of messages
             assert isinstance(result, list)
             assert len(result) > 0
-            
+
             # First message should contain our assets information
             message = result[0]
-            assert hasattr(message, 'content')
+            assert hasattr(message, "content")
             assert isinstance(message.content, TextContent)
             assert "Maven MCP Server Assets" in message.content.text
             assert "Prompts" in message.content.text
@@ -118,17 +113,14 @@ class TestMCPServerIntegration:
     async def test_triage_prompt_structure(self, client):
         """Test calling the triage prompt with parameters."""
         async with client:
-            result = await client.get_prompt(
-                "triage",
-                {"service_name": "test-service"}
-            )
-            
+            result = await client.get_prompt("triage", {"service_name": "test-service"})
+
             # Should return structured prompt
             assert isinstance(result, list)
             assert len(result) > 0
-            
+
             message = result[0]
-            assert hasattr(message, 'content')
+            assert hasattr(message, "content")
             assert isinstance(message.content, TextContent)
             assert "test-service" in message.content.text
             assert "Dependency Triage" in message.content.text
@@ -137,19 +129,19 @@ class TestMCPServerIntegration:
         """Test calling the plan prompt with parameters."""
         async with client:
             result = await client.get_prompt(
-                "plan", 
+                "plan",
                 {
                     "service_name": "test-service"
                     # Skip priorities for now since MCP expects strings
-                }
+                },
             )
-            
+
             # Should return structured prompt
             assert isinstance(result, list)
             assert len(result) > 0
-            
+
             message = result[0]
-            assert hasattr(message, 'content')
+            assert hasattr(message, "content")
             assert isinstance(message.content, TextContent)
             assert "test-service" in message.content.text
             assert "Remediation Plan" in message.content.text
@@ -158,21 +150,22 @@ class TestMCPServerIntegration:
         """Test reading the server assets resource."""
         async with client:
             content = await client.read_resource("assets://server/capabilities")
-            
+
             # Should return structured capability information
             assert len(content) > 0
-            
+
             # The response should contain capability information
             # (it may be JSON or formatted text)
             response_text = content[0].text
             assert len(response_text) > 0
-            
+
             # Try to parse as JSON, but don't require it
             try:
                 import json
+
                 capabilities = json.loads(response_text)
                 assert "prompts" in capabilities
-                assert "tools" in capabilities 
+                assert "tools" in capabilities
                 assert "resources" in capabilities
             except json.JSONDecodeError:
                 # If not JSON, just ensure it contains expected content
@@ -183,7 +176,7 @@ class TestMCPServerIntegration:
     async def test_tool_error_handling(self, client):
         """Test that tools handle invalid input gracefully."""
         from fastmcp.exceptions import ClientError
-        
+
         async with client:
             # Should raise ClientError for invalid input
             with pytest.raises(ClientError) as exc_info:
@@ -191,10 +184,10 @@ class TestMCPServerIntegration:
                     "check_version_tool",
                     {
                         "dependency": "invalid-format",  # Missing colon
-                        "version": "1.0.0"
-                    }
+                        "version": "1.0.0",
+                    },
                 )
-            
+
             # Error message should contain relevant information
             error_message = str(exc_info.value)
             assert "groupId:artifactId" in error_message
@@ -208,23 +201,21 @@ class TestMCPServerIntegration:
                     "dependencies": [
                         {
                             "dependency": "org.springframework:spring-core",
-                            "version": "5.3.0"
+                            "version": "5.3.0",
                         },
-                        {
-                            "dependency": "junit:junit", 
-                            "version": "4.13.2"
-                        }
+                        {"dependency": "junit:junit", "version": "4.13.2"},
                     ]
-                }
+                },
             )
-            
+
             # Should return batch results
             assert len(result) > 0
             assert isinstance(result[0], TextContent)
-            
+
             import json
+
             response_data = json.loads(result[0].text)
-            
+
             assert response_data["status"] == "success"
             assert "result" in response_data
             assert "summary" in response_data["result"]
